@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>자산 관리 & 포트폴리오 리밸런싱 대시보드</title>
   
-  <!-- Pretendard Variable 웹폰트 (제공된 HTML 테마 계승) -->
+  <!-- Pretendard Variable 웹폰트 -->
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   
@@ -15,7 +15,7 @@
 
   <style>
     /* ==========================================================================
-       iOS 분위기 & 제공된 HTML 테마 계승 CSS 변수 시스템
+       iOS 감성 테마 & Pretendard CSS 변수 시스템
        ========================================================================== */
     :root {
       --font-main: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
@@ -25,7 +25,7 @@
       --radius-pill: 9999px;
       --transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 
-      /* 컬러 팔레트 (기본: 상쾌하고 정갈한 iOS 라이트 모드) */
+      /* 라이트 테마 (기본) */
       --bg-a: #f4f6fa;
       --bg-b: #eaeff6;
       --bg-c: #e1e8f2;
@@ -34,7 +34,7 @@
       --panel-hi: rgba(255, 255, 255, 0.95);
       --panel-solid: #ffffff;
       --line: rgba(20, 24, 33, 0.08);
-      --line-hi: rgba(20, 24, 33, 0.14);
+      --line-hi: rgba(20, 24, 33, 0.15);
 
       --ink: #1c2029;
       --ink-2: rgba(28, 32, 41, 0.68);
@@ -44,16 +44,16 @@
       --accent-soft: rgba(59, 91, 219, 0.10);
       --accent-hover: #314db8;
 
-      --safe: #2e7d32;            /* 안전자산: 차분한 그린 */
+      --safe: #2e7d32;            /* 안전자산: 그린 */
       --safe-bg: rgba(46, 125, 50, 0.10);
       --safe-border: rgba(46, 125, 50, 0.25);
 
-      --risk: #d9480f;            /* 위험자산: 따뜻한 앰버/코랄 */
+      --risk: #d9480f;            /* 위험자산: 코랄 */
       --risk-bg: rgba(217, 72, 15, 0.10);
       --risk-border: rgba(217, 72, 15, 0.25);
 
-      --up: #e03131;              /* 상승/수익 (국내 관례 빨강) */
-      --down: #1971c2;            /* 하락/손실 (파랑) */
+      --up: #e03131;
+      --down: #1971c2;
       --neutral: #868e96;
 
       --shadow-sm: 0 4px 14px rgba(28, 32, 41, 0.05);
@@ -114,14 +114,14 @@
     }
 
     .app-container {
-      max-width: 1480px;
+      max-width: 1560px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 24px;
     }
 
-    /* 1. 헤더 (iOS 상단 바) */
+    /* 1. 헤더 */
     .header-bar {
       display: flex;
       align-items: center;
@@ -300,7 +300,7 @@
       color: var(--ink-2);
     }
     .fx-rate-input {
-      width: 85px;
+      width: 90px;
       border: none;
       background: var(--panel-solid);
       padding: 4px 8px;
@@ -472,14 +472,16 @@
       -webkit-backdrop-filter: var(--card-blur);
       border: 1px solid var(--line);
       border-radius: var(--radius-lg);
-      padding: 22px;
+      padding: 24px;
       box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
     .rebalance-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 16px;
       flex-wrap: wrap;
       gap: 12px;
     }
@@ -491,34 +493,33 @@
     }
     .rebalance-card-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 14px;
-      margin-top: 14px;
     }
     .rebalance-item-box {
       background: var(--panel-hi);
       border: 1px solid var(--line);
       border-radius: var(--radius-md);
-      padding: 14px 16px;
+      padding: 16px 18px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
     .rebalance-item-title {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 600;
       color: var(--ink-2);
       display: flex;
       justify-content: space-between;
     }
     .rebalance-item-val {
-      font-size: 1.15rem;
+      font-size: 1.25rem;
       font-weight: 700;
     }
     .rebalance-item-guide {
-      font-size: 0.75rem;
+      font-size: 0.76rem;
       font-weight: 600;
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 6px;
       display: inline-block;
       width: fit-content;
@@ -534,6 +535,54 @@
     .rebalance-item-guide.ok {
       background: rgba(46, 125, 50, 0.12);
       color: var(--safe);
+    }
+
+    /* 추가 투자금 시뮬레이터 박스 */
+    .cash-inject-section {
+      background: rgba(59, 91, 219, 0.04);
+      border: 1px solid rgba(59, 91, 219, 0.18);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .cash-inject-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .cash-inject-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cash-quick-chips {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .chip-btn {
+      border: 1px solid var(--line-hi);
+      background: var(--panel-solid);
+      color: var(--ink-2);
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      font-size: 0.74rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .chip-btn:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent);
     }
 
     /* 5. 테이블 섹션 */
@@ -637,6 +686,20 @@
       border-bottom: 1px solid var(--line);
       white-space: nowrap;
       user-select: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .asset-table th:hover {
+      background: rgba(127, 140, 170, 0.14);
+      color: var(--accent);
+    }
+    .asset-table th.no-btn-header {
+      background: rgba(59, 91, 219, 0.10);
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .asset-table th.no-btn-header:hover {
+      background: rgba(59, 91, 219, 0.20);
     }
     .asset-table td {
       padding: 10px 14px;
@@ -709,24 +772,30 @@
     .inline-input.amount {
       text-align: right;
       font-weight: 700;
-      width: 130px;
+      width: 140px;
     }
 
-    .currency-pill {
+    /* 통화 뱃지 (국기 이모지 포함) */
+    .currency-flag-badge {
       display: inline-flex;
+      align-items: center;
+      gap: 5px;
       cursor: pointer;
-      padding: 2px 7px;
-      border-radius: 6px;
-      font-size: 0.72rem;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      font-size: 0.75rem;
       font-weight: 700;
       background: rgba(127, 140, 170, 0.12);
-      color: var(--ink-2);
+      color: var(--ink);
       border: 1px solid var(--line);
       transition: var(--transition);
+      user-select: none;
     }
-    .currency-pill:hover {
+    .currency-flag-badge:hover {
       background: var(--accent-soft);
       color: var(--accent);
+      border-color: var(--accent);
+      transform: scale(1.03);
     }
 
     .fx-toggle-btn {
@@ -787,7 +856,7 @@
       to { opacity: 1; }
     }
     .modal-sheet {
-      width: min(560px, 100%);
+      width: min(600px, 100%);
       max-height: 90vh;
       overflow-y: auto;
       background: var(--panel-solid);
@@ -948,13 +1017,13 @@
       </div>
 
       <div class="header-actions">
-        <!-- 통화 전환 토글 (KRW ₩ / USD $) -->
+        <!-- 통화 전환 토글 (KRW / USD) -->
         <div class="segmented-control" title="원클릭 통화 전환">
           <button class="segment-btn active" id="currKRW" onclick="setCurrencyView('KRW')">
-            <span>₩ KRW</span>
+            <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" width="18" height="12" style="border-radius:2px;vertical-align:middle;display:inline-block;border:1px solid rgba(0,0,0,0.15);"><rect width="300" height="200" fill="#fff"/><path transform="rotate(-33.69,150,100)" d="M150,50 A50,50 0 0,1 150,150 A25,25 0 0,1 150,100 A25,25 0 0,0 150,50 Z" fill="#cd2e3a"/><path transform="rotate(-33.69,150,100)" d="M150,50 A50,50 0 0,0 150,150 A25,25 0 0,0 150,100 A25,25 0 0,1 150,50 Z" fill="#0047a0"/><g transform="rotate(-33.69,68,44)"><rect x="38" y="30" width="60" height="8" fill="#000"/><rect x="38" y="43" width="60" height="8" fill="#000"/><rect x="38" y="56" width="60" height="8" fill="#000"/></g><g transform="rotate(-33.69,232,156)"><rect x="202" y="142" width="27" height="8" fill="#000"/><rect x="233" y="142" width="27" height="8" fill="#000"/><rect x="202" y="155" width="27" height="8" fill="#000"/><rect x="233" y="155" width="27" height="8" fill="#000"/><rect x="202" y="168" width="27" height="8" fill="#000"/><rect x="233" y="168" width="27" height="8" fill="#000"/></g><g transform="rotate(-33.69,232,44)"><rect x="202" y="30" width="27" height="8" fill="#000"/><rect x="233" y="30" width="27" height="8" fill="#000"/><rect x="202" y="43" width="60" height="8" fill="#000"/><rect x="202" y="56" width="27" height="8" fill="#000"/><rect x="233" y="56" width="27" height="8" fill="#000"/></g><g transform="rotate(-33.69,68,156)"><rect x="38" y="142" width="60" height="8" fill="#000"/><rect x="38" y="155" width="27" height="8" fill="#000"/><rect x="69" y="155" width="27" height="8" fill="#000"/><rect x="38" y="168" width="60" height="8" fill="#000"/></g></svg> KRW</span>
           </button>
           <button class="segment-btn" id="currUSD" onclick="setCurrencyView('USD')">
-            <span>$ USD</span>
+            <span><svg class="flag-icon" viewBox="0 0 741 390" width="18" height="12" style="border-radius:2px; vertical-align:middle; display:inline-block; border:1px solid rgba(0,0,0,0.15);"><rect width="741" height="390" fill="#bb133e"/><path d="M0,30H741M0,90H741M0,150H741M0,210H741M0,270H741M0,330H741" stroke="#fff" stroke-width="30"/><rect width="296.4" height="210" fill="#002147"/><g fill="#fff"><path d="M24.7,15l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M74.1,15l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M123.5,15l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M172.9,15l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M222.3,15l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M271.7,15l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M49.4,36l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M98.8,36l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M148.2,36l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M197.6,36l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M247,36l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M24.7,57l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M74.1,57l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M123.5,57l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M172.9,57l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M222.3,57l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M271.7,57l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M49.4,78l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M98.8,78l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M148.2,78l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M197.6,78l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M247,78l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M24.7,99l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M74.1,99l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M123.5,99l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M172.9,99l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M222.3,99l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M271.7,99l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M49.4,120l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M98.8,120l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M148.2,120l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M197.6,120l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M247,120l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M24.7,141l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M74.1,141l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M123.5,141l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M172.9,141l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M222.3,141l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M271.7,141l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M49.4,162l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M98.8,162l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M148.2,162l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M197.6,162l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M247,162l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M24.7,183l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M74.1,183l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M123.5,183l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M172.9,183l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M222.3,183l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M271.7,183l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/></g></svg> USD</span>
           </button>
         </div>
 
@@ -973,8 +1042,8 @@
           <span>엑셀 업로드</span>
         </button>
 
-        <!-- 분류 설정 모달 버튼 -->
-        <button class="ios-btn" onclick="openCategorySettingsModal()" title="안전/위험 자산 기본 설정">
+        <!-- 분류 설정 모달 버튼 (사용자 정의 자산군 추가 포함) -->
+        <button class="ios-btn" onclick="openCategorySettingsModal()" title="안전/위험 자산 및 자산군 추가/설정">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"/>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -1000,7 +1069,7 @@
         </div>
         
         <select id="snapshotSelect" class="select-style" onchange="onSnapshotChanged()">
-          <!-- 날짜 옵션 -->
+          <!-- 날짜 옵션 (종목 개수 문구 없이 YYYY-MM-DD만 깔끔하게 출력) -->
         </select>
 
         <button class="ios-btn primary" onclick="openAddSnapshotModal(false)">
@@ -1010,7 +1079,7 @@
           <span>새 날짜 추가</span>
         </button>
 
-        <button class="ios-btn" onclick="openAddSnapshotModal(true)" title="현재 날짜의 종목을 그대로 복사하여 새 날짜 생성">
+        <button class="ios-btn" onclick="openAddSnapshotModal(true)" title="현재 날짜의 종목 구성을 그대로 복사하여 새 날짜 생성">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
           </svg>
@@ -1028,7 +1097,7 @@
       <div class="fx-rate-box">
         <label for="currentFxInput">기준 환율 (USD/KRW):</label>
         <span style="font-size: 0.84rem; font-weight: 600;">₩</span>
-        <input type="number" id="currentFxInput" class="fx-rate-input" step="1" onchange="updateSnapshotFxRate(this.value)">
+        <input type="text" id="currentFxInput" class="fx-rate-input" oninput="formatFxInput(this)" onchange="updateSnapshotFxRate(this.value)">
         <button class="ios-btn" style="padding: 3px 8px; font-size: 0.72rem;" onclick="applyFxRate()">적용</button>
       </div>
     </section>
@@ -1064,7 +1133,7 @@
           </div>
         </div>
         <div class="kpi-sub">
-          <span>설정 창에서 언제든 종목별 안전/위험 전환 가능</span>
+          <span>언제든 종목별 안전/위험 전환 가능</span>
         </div>
       </div>
 
@@ -1101,9 +1170,9 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10h-10z"/>
             </svg>
-            <span>자산군 구성 비중 (주식·채권·현금·금·비트코인·리츠)</span>
+            <span>자산군 구성 비중</span>
           </div>
-          <span class="badge" id="chartClassCount">6개 자산군</span>
+          <span class="badge" id="chartClassCount">분류 구성</span>
         </div>
         <div class="chart-container">
           <canvas id="classDoughnutChart"></canvas>
@@ -1126,7 +1195,7 @@
         </div>
       </div>
 
-      <!-- 리밸런싱 도우미 & 시점 비교 패널 -->
+      <!-- 리밸런싱 도우미 & 과거 시점 비교 패널 -->
       <div class="rebalance-panel">
         <div class="rebalance-header">
           <div class="chart-card-title">
@@ -1151,21 +1220,52 @@
         <div id="rebalanceResultBox" class="rebalance-card-grid">
           <!-- 리밸런싱 결과 카드 -->
         </div>
+
+        <!-- 7번째 요청: 추가 투자금 리밸런싱 시뮬레이터 -->
+        <div class="cash-inject-section">
+          <div class="cash-inject-head">
+            <div class="cash-inject-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/>
+              </svg>
+              <span>추가 투자금 투입 리밸런싱 시뮬레이터</span>
+            </div>
+            <div class="cash-quick-chips">
+              <span style="font-size: 0.76rem; color: var(--ink-3);">빠른 금액 선택:</span>
+              <button class="chip-btn" onclick="setCashInject(1000000)">+100만</button>
+              <button class="chip-btn" onclick="setCashInject(5000000)">+500만</button>
+              <button class="chip-btn" onclick="setCashInject(10000000)">+1,000만</button>
+              <button class="chip-btn" onclick="setCashInject(50000000)">+5,000만</button>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <label for="cashInjectInput" style="font-size: 0.82rem; font-weight: 600; color: var(--ink-2);">투자할 추가 자금:</label>
+              <div style="display: flex; align-items: center; gap: 4px; background: var(--panel-solid); border: 1px solid var(--line-hi); border-radius: 8px; padding: 4px 10px;">
+                <span style="font-size: 0.8rem; font-weight: 700; color: var(--accent);">₩</span>
+                <input type="text" id="cashInjectInput" class="inline-input" style="width: 150px; text-align: right; font-weight: 700; font-size: 0.9rem;" value="10,000,000" oninput="formatCashInjectInput(this)" onchange="renderRebalanceAndCompare()">
+              </div>
+            </div>
+            <span style="font-size: 0.78rem; color: var(--ink-3);">
+              ※ 목표 안전자산 비중(<b id="simTargetRatioDisplay">40%</b>)을 맞추기 위해 신규 자금을 어떻게 배분해야 하는지 계산합니다.
+            </span>
+          </div>
+
+          <div id="cashInjectResultBox" class="rebalance-card-grid" style="margin-top: 6px;">
+            <!-- 시뮬레이터 결과 -->
+          </div>
+        </div>
+
       </div>
     </section>
 
     <!-- 5. 종목 상세 테이블 섹션 (스마트 그리드) -->
     <section class="table-section">
       <div class="table-toolbar">
-        <!-- 카테고리 탭 (요청 순서: 전체, 주식, 채권, 현금, 금, 비트코인, 리츠) -->
+        <!-- 동적 카테고리 탭 (기본 순서: 전체, 주식, 채권, 현금, 금, 비트코인, 리츠 + 사용자 추가 자산군) -->
         <div class="category-tabs" id="categoryTabs">
-          <button class="cat-tab-btn active" onclick="setCategoryFilter('ALL')">전체 <span class="badge" id="badgeCountAll">0</span></button>
-          <button class="cat-tab-btn" onclick="setCategoryFilter('주식')">주식 <span class="badge" id="badgeCount주식">0</span></button>
-          <button class="cat-tab-btn" onclick="setCategoryFilter('채권')">채권 <span class="badge" id="badgeCount채권">0</span></button>
-          <button class="cat-tab-btn" onclick="setCategoryFilter('현금')">현금 <span class="badge" id="badgeCount현금">0</span></button>
-          <button class="cat-tab-btn" onclick="setCategoryFilter('금')">금 <span class="badge" id="badgeCount금">0</span></button>
-          <button class="cat-tab-btn" onclick="setCategoryFilter('비트코인')">비트코인 <span class="badge" id="badgeCount비트코인">0</span></button>
-          <button class="cat-tab-btn" onclick="setCategoryFilter('리츠')">리츠 <span class="badge" id="badgeCount리츠">0</span></button>
+          <!-- 자바스크립트로 동적 렌더링 -->
         </div>
 
         <div class="filter-group">
@@ -1184,7 +1284,7 @@
           </select>
 
           <!-- 검색 -->
-          <input type="text" id="tableSearchInput" class="search-input" placeholder="종목명/계좌/비고 검색..." oninput="renderTable()">
+          <input type="text" id="tableSearchInput" class="search-input" placeholder="종목명/계좌/비고/메모 검색..." oninput="renderTable()">
 
           <!-- 새 종목 추가 버튼 -->
           <button class="ios-btn primary" onclick="addNewItemRow()">
@@ -1201,18 +1301,44 @@
         <table class="asset-table" id="assetTable">
           <thead>
             <tr>
-              <th style="width: 50px; text-align: center;">No</th>
-              <th style="width: 90px; text-align: center;">안전 / 위험</th>
-              <th style="width: 100px;">자산 구분</th>
-              <th style="min-width: 160px;">종목명</th>
-              <th style="width: 80px; text-align: center;">입력통화</th>
-              <th style="width: 140px; text-align: right;">입력 금액</th>
-              <th style="width: 140px; text-align: right;">평가 금액 (<span class="currency-label">KRW</span>)</th>
-              <th style="width: 80px; text-align: right;">비중 (%)</th>
-              <th style="min-width: 130px;">위치 계좌</th>
-              <th style="width: 85px; text-align: center;">환노출</th>
-              <th style="min-width: 160px;">비고</th>
-              <th style="width: 50px; text-align: center;">관리</th>
+              <th class="no-btn-header" onclick="sortSmartByRule()" title="클릭 시 규칙대로 스마트 정렬: 안전자산->위험자산 / 현금->채권->금->비트코인->리츠->주식 / 계좌별 최대금액순" style="width: 70px; text-align: center;">
+                No ⚡
+              </th>
+              <th onclick="sortBy('isSafe')" title="안전/위험 순 정렬" style="width: 95px; text-align: center;">
+                안전 / 위험 <span id="sort_isSafe"></span>
+              </th>
+              <th onclick="sortBy('category')" title="자산 구분별 가나다순 정렬" style="width: 100px;">
+                자산 구분 <span id="sort_category"></span>
+              </th>
+              <th onclick="sortBy('name')" title="종목명 가나다-ABC-숫자순 정렬" style="min-width: 150px;">
+                종목명 <span id="sort_name"></span>
+              </th>
+              <th onclick="sortBy('currency')" title="통화별 정렬" style="width: 95px; text-align: center;">
+                입력통화 <span id="sort_currency"></span>
+              </th>
+              <th onclick="sortBy('amount')" title="입력 금액순 정렬" style="width: 140px; text-align: right;">
+                입력 금액 <span id="sort_amount"></span>
+              </th>
+              <th onclick="sortBy('evalAmount')" title="평가 금액순 정렬" style="width: 140px; text-align: right;">
+                평가 금액 (<span class="currency-label">KRW</span>) <span id="sort_evalAmount"></span>
+              </th>
+              <th onclick="sortBy('evalAmount')" title="비중순 정렬" style="width: 80px; text-align: right;">
+                비중 (%)
+              </th>
+              <th onclick="sortBy('account')" title="위치 계좌별 가나다순 정렬" style="min-width: 120px;">
+                위치 계좌 <span id="sort_account"></span>
+              </th>
+              <th onclick="sortBy('fxExposed')" title="환노출 여부순 정렬" style="width: 85px; text-align: center;">
+                환노출 <span id="sort_fxExposed"></span>
+              </th>
+              <th onclick="sortBy('memo')" title="비고순 정렬" style="min-width: 130px;">
+                비고 <span id="sort_memo"></span>
+              </th>
+              <!-- 1번째 요청: 비고 옆 별도 상세 메모 공간 -->
+              <th onclick="sortBy('note')" title="메모순 정렬" style="min-width: 140px;">
+                상세 메모 ✍️ <span id="sort_note"></span>
+              </th>
+              <th style="width: 50px; text-align: center; cursor: default;">관리</th>
             </tr>
           </thead>
           <tbody id="assetTableBody">
@@ -1245,8 +1371,8 @@
         </div>
         <div class="form-group">
           <label for="newSnapshotFx">해당 일자의 기준 환율 (USD/KRW)</label>
-          <input type="number" id="newSnapshotFx" class="form-control" value="1350" step="1">
-          <span class="form-tip">예: 2026-08-14 기준 1350원, 2027-01-01 기준 1000원 등 일자별 적용 환율</span>
+          <input type="text" id="newSnapshotFx" class="form-control" value="1,350" oninput="formatFxInput(this)">
+          <span class="form-tip">예: 2026-08-14 기준 1,350원, 2027-01-01 기준 1,000원 등 일자별 환율</span>
         </div>
         <div class="form-group" id="copyNoticeGroup" style="display: none;">
           <div style="padding: 10px 14px; background: var(--accent-soft); border-radius: var(--radius-md); font-size: 0.8rem; color: var(--accent); font-weight: 600;">
@@ -1261,27 +1387,45 @@
     </div>
   </div>
 
-  <!-- 2) 안전/위험 자산 전역 설정 모달 -->
+  <!-- 2) 안전/위험 자산 전역 설정 & 자산군 추가 모달 (6번째 요청 반영) -->
   <div class="modal-backdrop" id="categorySettingsModal">
     <div class="modal-sheet">
       <div class="modal-head">
         <div>
-          <h3 class="modal-title">자산군 기본 분류 설정</h3>
-          <p class="modal-sub">각 자산군을 추가할 때 적용할 기본 안전/위험 상태를 설정합니다.</p>
+          <h3 class="modal-title">자산분류 및 안전/위험 기본 설정</h3>
+          <p class="modal-sub">원하는 자산군(예: 부동산 등)을 직접 추가하고, 각 자산군의 기본 안전/위험 속성을 지정합니다.</p>
         </div>
         <button class="ios-btn" onclick="closeModal('categorySettingsModal')">✕</button>
       </div>
       <div class="modal-body">
-        <p class="form-tip">
-          종목별 테이블에서 언제든 개별로 [안전] ↔ [위험] 뱃지를 클릭해 전환할 수 있으며, 여기서 기본값을 변경하면 신규 종목 추가 시 자동 적용됩니다.
-        </p>
-        <div id="categoryDefaultsList" style="display: flex; flex-direction: column; gap: 10px;">
-          <!-- 카테고리별 스위치 -->
+        <!-- 6번째 요청: 새로운 자산군 추가 폼 -->
+        <div style="background: rgba(59, 91, 219, 0.05); border: 1px solid rgba(59, 91, 219, 0.2); border-radius: var(--radius-md); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-size: 0.84rem; font-weight: 700; color: var(--accent); display: flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <span>새로운 자산군 직접 추가</span>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <input type="text" id="newCategoryName" class="form-control" style="flex: 1; min-width: 140px; padding: 7px 10px; font-size: 0.82rem;" placeholder="자산군 이름 (예: 부동산, 원자재)">
+            <select id="newCategorySafety" class="select-style" style="padding: 7px 10px; font-size: 0.82rem;">
+              <option value="true">🛡️ 안전자산</option>
+              <option value="false">⚡ 위험자산</option>
+            </select>
+            <button class="ios-btn primary" style="padding: 7px 14px; font-size: 0.82rem;" onclick="addNewCategory()">추가하기</button>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+          <span style="font-size: 0.82rem; font-weight: 700; color: var(--ink-2);">자산군별 안전/위험 분류 목록</span>
+          <span style="font-size: 0.72rem; color: var(--ink-3);">테이블에서도 개별 변경 가능</span>
+        </div>
+
+        <div id="categoryDefaultsList" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- 카테고리별 스위치 목록 -->
         </div>
       </div>
       <div class="modal-foot">
         <button class="ios-btn" onclick="closeModal('categorySettingsModal')">닫기</button>
-        <button class="ios-btn primary" onclick="saveCategorySettings()">저장 및 전체 적용</button>
+        <button class="ios-btn primary" onclick="saveCategorySettings()">설정 저장 및 전체 적용</button>
       </div>
     </div>
   </div>
@@ -1309,8 +1453,9 @@
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: rgba(127,140,170,0.08); border-radius: var(--radius-md);">
           <div>
             <div style="font-size: 0.84rem; font-weight: 600;">샘플 엑셀 템플릿</div>
-            <div style="font-size: 0.74rem; color: var(--ink-3);">things 시트 양식 그대로 작성 가능한 서식</div>
+            <div style="font-size: 0.74rem; color: var(--ink-3);">금액 십만원 통일 · 표준 서식</div>
           </div>
+          <!-- 8번째 요청: 십만원 통일 샘플 -->
           <button class="ios-btn" onclick="downloadSampleTemplate()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
@@ -1328,83 +1473,86 @@
   <!-- 토스트 알림 컨테이너 -->
   <div class="toast-box" id="toastContainer"></div>
 
-  <!-- 자바스크립트 엔진 -->
+  <!-- ==========================================================================
+       자바스크립트 엔진
+       ========================================================================== -->
   <script>
     "use strict";
 
-    const ASSET_CLASSES = ["주식", "채권", "현금", "금", "비트코인", "리츠"];
+    // 기본 6대 자산군 (사용자 정의 카테고리가 추가될 수 있음)
+    const DEFAULT_ASSET_CLASSES = ["주식", "채권", "현금", "금", "비트코인", "리츠"];
 
     const DEFAULT_CATEGORY_SAFETY = {
       "현금": true,
       "채권": true,
       "금": true,
-      "비트코인": true,   // 사용자의 현재 설정 반영 (설정에서 언제든 변경 가능)
-      "리츠": true,      // PDF things 시트 기준
+      "비트코인": true,   // 사용자의 현재 설정 반영
+      "리츠": true,
       "주식": false
     };
 
-    // PDF 1, 2페이지의 2026-08-14 기준 완벽한 19개 종목 초기 데이터
+    // PDF 1, 2페이지의 2026-08-14 기준 19개 종목 초기 데이터 (비고와 메모 분리)
     const INITIAL_SNAPSHOT_20260814 = {
       id: "2026-08-14",
       date: "2026-08-14",
       exchangeRate: 1350,
       items: [
-        { id: "item-1",  isSafe: true,  category: "현금",   name: "예금",              currency: "KRW", amount: 400000,   account: "토스뱅크",   fxExposed: false, memo: "신규" },
-        { id: "item-2",  isSafe: true,  category: "현금",   name: "CMA",              currency: "KRW", amount: 2800000,  account: "미래에셋",   fxExposed: false, memo: "연금저축" },
-        { id: "item-3",  isSafe: true,  category: "현금",   name: "CMA",              currency: "KRW", amount: 300000,   account: "카카오페이", fxExposed: false, memo: "" },
-        { id: "item-4",  isSafe: true,  category: "현금",   name: "적금",              currency: "KRW", amount: 9800000,  account: "청년도약계좌", fxExposed: false, memo: "" },
-        { id: "item-5",  isSafe: true,  category: "채권",   name: "SGOV",             currency: "KRW", amount: 7000000,  account: "키움증권",   fxExposed: true,  memo: "" },
-        { id: "item-6",  isSafe: true,  category: "채권",   name: "미국 30년 국채",    currency: "KRW", amount: 9000000,  account: "연금저축",   fxExposed: false, memo: "연금저축" },
-        { id: "item-7",  isSafe: true,  category: "금",     name: "금현물",            currency: "KRW", amount: 14000000, account: "미래에셋",   fxExposed: true,  memo: "" },
-        { id: "item-8",  isSafe: true,  category: "비트코인", name: "비트코인",        currency: "KRW", amount: 12000000, account: "빗썸",     fxExposed: true,  memo: "" },
-        { id: "item-9",  isSafe: true,  category: "리츠",   name: "리얼티인컴",        currency: "KRW", amount: 6700000,  account: "키움증권",   fxExposed: true,  memo: "해외계좌(70%)" },
-        { id: "item-10", isSafe: false, category: "주식",   name: "엔비디아",          currency: "KRW", amount: 10500000, account: "키움증권",   fxExposed: true,  memo: "해외주식" },
-        { id: "item-11", isSafe: false, category: "주식",   name: "S&P500 연금",      currency: "KRW", amount: 8300000,  account: "연금저축",   fxExposed: true,  memo: "연금저축" },
-        { id: "item-12", isSafe: false, category: "주식",   name: "코스피200",         currency: "KRW", amount: 5700000,  account: "ISA",       fxExposed: true,  memo: "ISA" },
-        { id: "item-13", isSafe: false, category: "주식",   name: "코스피200",         currency: "KRW", amount: 13000000, account: "연금저축",   fxExposed: true,  memo: "연금저축" },
-        { id: "item-14", isSafe: false, category: "주식",   name: "S&P500(환노출)",   currency: "KRW", amount: 11000000, account: "ISA",       fxExposed: true,  memo: "ISA" },
-        { id: "item-15", isSafe: false, category: "주식",   name: "나스닥",            currency: "KRW", amount: 6000000,  account: "ISA",       fxExposed: true,  memo: "ISA" },
-        { id: "item-16", isSafe: false, category: "주식",   name: "나스닥",            currency: "KRW", amount: 11300000, account: "연금저축",   fxExposed: true,  memo: "연금저축" },
-        { id: "item-17", isSafe: false, category: "주식",   name: "팔란티어",          currency: "KRW", amount: 3800000,  account: "키움증권",   fxExposed: true,  memo: "해외주식" },
-        { id: "item-18", isSafe: false, category: "주식",   name: "알파벳A",          currency: "KRW", amount: 10300000, account: "키움증권",   fxExposed: true,  memo: "해외주식" },
-        { id: "item-19", isSafe: false, category: "주식",   name: "애플",              currency: "KRW", amount: 8200000,  account: "키움증권",   fxExposed: true,  memo: "해외주식" }
+        { id: "item-1",  isSafe: true,  category: "현금",   name: "예금",              currency: "KRW", amount: 400000,   account: "토스뱅크",   fxExposed: false, memo: "신규", note: "" },
+        { id: "item-2",  isSafe: true,  category: "현금",   name: "CMA",              currency: "KRW", amount: 2800000,  account: "미래에셋",   fxExposed: false, memo: "연금저축", note: "" },
+        { id: "item-3",  isSafe: true,  category: "현금",   name: "CMA",              currency: "KRW", amount: 300000,   account: "카카오페이", fxExposed: false, memo: "", note: "" },
+        { id: "item-4",  isSafe: true,  category: "현금",   name: "적금",              currency: "KRW", amount: 9800000,  account: "청년도약계좌", fxExposed: false, memo: "", note: "" },
+        { id: "item-5",  isSafe: true,  category: "채권",   name: "SGOV",             currency: "KRW", amount: 7000000,  account: "키움증권",   fxExposed: true,  memo: "", note: "" },
+        { id: "item-6",  isSafe: true,  category: "채권",   name: "미국 30년 국채",    currency: "KRW", amount: 9000000,  account: "연금저축",   fxExposed: false, memo: "연금저축", note: "" },
+        { id: "item-7",  isSafe: true,  category: "금",     name: "금현물",            currency: "KRW", amount: 14000000, account: "미래에셋",   fxExposed: true,  memo: "", note: "" },
+        { id: "item-8",  isSafe: true,  category: "비트코인", name: "비트코인",        currency: "KRW", amount: 12000000, account: "빗썸",     fxExposed: true,  memo: "", note: "" },
+        { id: "item-9",  isSafe: true,  category: "리츠",   name: "리얼티인컴",        currency: "KRW", amount: 6700000,  account: "키움증권",   fxExposed: true,  memo: "해외계좌(70%)", note: "" },
+        { id: "item-10", isSafe: false, category: "주식",   name: "엔비디아",          currency: "KRW", amount: 10500000, account: "키움증권",   fxExposed: true,  memo: "해외주식", note: "" },
+        { id: "item-11", isSafe: false, category: "주식",   name: "S&P500 연금",      currency: "KRW", amount: 8300000,  account: "연금저축",   fxExposed: true,  memo: "연금저축", note: "" },
+        { id: "item-12", isSafe: false, category: "주식",   name: "코스피200",         currency: "KRW", amount: 5700000,  account: "ISA",       fxExposed: true,  memo: "ISA", note: "" },
+        { id: "item-13", isSafe: false, category: "주식",   name: "코스피200",         currency: "KRW", amount: 13000000, account: "연금저축",   fxExposed: true,  memo: "연금저축", note: "" },
+        { id: "item-14", isSafe: false, category: "주식",   name: "S&P500(환노출)",   currency: "KRW", amount: 11000000, account: "ISA",       fxExposed: true,  memo: "ISA", note: "" },
+        { id: "item-15", isSafe: false, category: "주식",   name: "나스닥",            currency: "KRW", amount: 6000000,  account: "ISA",       fxExposed: true,  memo: "ISA", note: "" },
+        { id: "item-16", isSafe: false, category: "주식",   name: "나스닥",            currency: "KRW", amount: 11300000, account: "연금저축",   fxExposed: true,  memo: "연금저축", note: "" },
+        { id: "item-17", isSafe: false, category: "주식",   name: "팔란티어",          currency: "KRW", amount: 3800000,  account: "키움증권",   fxExposed: true,  memo: "해외주식", note: "" },
+        { id: "item-18", isSafe: false, category: "주식",   name: "알파벳A",          currency: "KRW", amount: 10300000, account: "키움증권",   fxExposed: true,  memo: "해외주식", note: "" },
+        { id: "item-19", isSafe: false, category: "주식",   name: "애플",              currency: "KRW", amount: 8200000,  account: "키움증권",   fxExposed: true,  memo: "해외주식", note: "" }
       ]
     };
 
-    // 비교 시연을 위한 2026-09-22 기준 스냅샷
     const INITIAL_SNAPSHOT_20260922 = {
       id: "2026-09-22",
       date: "2026-09-22",
       exchangeRate: 1380,
       items: [
-        { id: "item-1",  isSafe: true,  category: "현금",   name: "예금",              currency: "KRW", amount: 500000,   account: "토스뱅크",   fxExposed: false, memo: "신규" },
-        { id: "item-2",  isSafe: true,  category: "현금",   name: "CMA",              currency: "KRW", amount: 3200000,  account: "미래에셋",   fxExposed: false, memo: "연금저축" },
-        { id: "item-3",  isSafe: true,  category: "현금",   name: "CMA",              currency: "KRW", amount: 300000,   account: "카카오페이", fxExposed: false, memo: "" },
-        { id: "item-4",  isSafe: true,  category: "현금",   name: "적금",              currency: "KRW", amount: 10500000, account: "청년도약계좌", fxExposed: false, memo: "" },
-        { id: "item-5",  isSafe: true,  category: "채권",   name: "SGOV",             currency: "KRW", amount: 7200000,  account: "키움증권",   fxExposed: true,  memo: "" },
-        { id: "item-6",  isSafe: true,  category: "채권",   name: "미국 30년 국채",    currency: "KRW", amount: 9200000,  account: "연금저축",   fxExposed: false, memo: "연금저축" },
-        { id: "item-7",  isSafe: true,  category: "금",     name: "금현물",            currency: "KRW", amount: 14800000, account: "미래에셋",   fxExposed: true,  memo: "" },
-        { id: "item-8",  isSafe: true,  category: "비트코인", name: "비트코인",        currency: "KRW", amount: 13500000, account: "빗썸",     fxExposed: true,  memo: "" },
-        { id: "item-9",  isSafe: true,  category: "리츠",   name: "리얼티인컴",        currency: "KRW", amount: 6900000,  account: "키움증권",   fxExposed: true,  memo: "해외계좌(70%)" },
-        { id: "item-10", isSafe: false, category: "주식",   name: "엔비디아",          currency: "KRW", amount: 11800000, account: "키움증권",   fxExposed: true,  memo: "해외주식" },
-        { id: "item-11", isSafe: false, category: "주식",   name: "S&P500 연금",      currency: "KRW", amount: 8800000,  account: "연금저축",   fxExposed: true,  memo: "연금저축" },
-        { id: "item-12", isSafe: false, category: "주식",   name: "코스피200",         currency: "KRW", amount: 5900000,  account: "ISA",       fxExposed: true,  memo: "ISA" },
-        { id: "item-13", isSafe: false, category: "주식",   name: "코스피200",         currency: "KRW", amount: 13400000, account: "연금저축",   fxExposed: true,  memo: "연금저축" },
-        { id: "item-14", isSafe: false, category: "주식",   name: "S&P500(환노출)",   currency: "KRW", amount: 11700000, account: "ISA",       fxExposed: true,  memo: "ISA" },
-        { id: "item-15", isSafe: false, category: "주식",   name: "나스닥",            currency: "KRW", amount: 6400000,  account: "ISA",       fxExposed: true,  memo: "ISA" },
-        { id: "item-16", isSafe: false, category: "주식",   name: "나스닥",            currency: "KRW", amount: 12000000, account: "연금저축",   fxExposed: true,  memo: "연금저축" },
-        { id: "item-17", isSafe: false, category: "주식",   name: "팔란티어",          currency: "KRW", amount: 4200000,  account: "키움증권",   fxExposed: true,  memo: "해외주식" },
-        { id: "item-18", isSafe: false, category: "주식",   name: "알파벳A",          currency: "KRW", amount: 10900000, account: "키움증권",   fxExposed: true,  memo: "해외주식" },
-        { id: "item-19", isSafe: false, category: "주식",   name: "애플",              currency: "KRW", amount: 8800000,  account: "키움증권",   fxExposed: true,  memo: "해외주식" }
+        { id: "item-1",  isSafe: true,  category: "현금",   name: "예금",              currency: "KRW", amount: 500000,   account: "토스뱅크",   fxExposed: false, memo: "신규", note: "비상금" },
+        { id: "item-2",  isSafe: true,  category: "현금",   name: "CMA",              currency: "KRW", amount: 3200000,  account: "미래에셋",   fxExposed: false, memo: "연금저축", note: "월 50만원 불입" },
+        { id: "item-3",  isSafe: true,  category: "현금",   name: "CMA",              currency: "KRW", amount: 300000,   account: "카카오페이", fxExposed: false, memo: "", note: "" },
+        { id: "item-4",  isSafe: true,  category: "현금",   name: "적금",              currency: "KRW", amount: 10500000, account: "청년도약계좌", fxExposed: false, memo: "", note: "만기 2028년" },
+        { id: "item-5",  isSafe: true,  category: "채권",   name: "SGOV",             currency: "KRW", amount: 7200000,  account: "키움증권",   fxExposed: true,  memo: "", note: "단기국채 ETF" },
+        { id: "item-6",  isSafe: true,  category: "채권",   name: "미국 30년 국채",    currency: "KRW", amount: 9200000,  account: "연금저축",   fxExposed: false, memo: "연금저축", note: "" },
+        { id: "item-7",  isSafe: true,  category: "금",     name: "금현물",            currency: "KRW", amount: 14800000, account: "미래에셋",   fxExposed: true,  memo: "", note: "KRX 금시장" },
+        { id: "item-8",  isSafe: true,  category: "비트코인", name: "비트코인",        currency: "KRW", amount: 13500000, account: "빗썸",     fxExposed: true,  memo: "", note: "장기 보유" },
+        { id: "item-9",  isSafe: true,  category: "리츠",   name: "리얼티인컴",        currency: "KRW", amount: 6900000,  account: "키움증권",   fxExposed: true,  memo: "해외계좌(70%)", note: "월배당" },
+        { id: "item-10", isSafe: false, category: "주식",   name: "엔비디아",          currency: "KRW", amount: 11800000, account: "키움증권",   fxExposed: true,  memo: "해외주식", note: "AI 대장주" },
+        { id: "item-11", isSafe: false, category: "주식",   name: "S&P500 연금",      currency: "KRW", amount: 8800000,  account: "연금저축",   fxExposed: true,  memo: "연금저축", note: "" },
+        { id: "item-12", isSafe: false, category: "주식",   name: "코스피200",         currency: "KRW", amount: 5900000,  account: "ISA",       fxExposed: true,  memo: "ISA", note: "" },
+        { id: "item-13", isSafe: false, category: "주식",   name: "코스피200",         currency: "KRW", amount: 13400000, account: "연금저축",   fxExposed: true,  memo: "연금저축", note: "" },
+        { id: "item-14", isSafe: false, category: "주식",   name: "S&P500(환노출)",   currency: "KRW", amount: 11700000, account: "ISA",       fxExposed: true,  memo: "ISA", note: "" },
+        { id: "item-15", isSafe: false, category: "주식",   name: "나스닥",            currency: "KRW", amount: 6400000,  account: "ISA",       fxExposed: true,  memo: "ISA", note: "" },
+        { id: "item-16", isSafe: false, category: "주식",   name: "나스닥",            currency: "KRW", amount: 12000000, account: "연금저축",   fxExposed: true,  memo: "연금저축", note: "" },
+        { id: "item-17", isSafe: false, category: "주식",   name: "팔란티어",          currency: "KRW", amount: 4200000,  account: "키움증권",   fxExposed: true,  memo: "해외주식", note: "" },
+        { id: "item-18", isSafe: false, category: "주식",   name: "알파벳A",          currency: "KRW", amount: 10900000, account: "키움증권",   fxExposed: true,  memo: "해외주식", note: "" },
+        { id: "item-19", isSafe: false, category: "주식",   name: "애플",              currency: "KRW", amount: 8800000,  account: "키움증권",   fxExposed: true,  memo: "해외주식", note: "" }
       ]
     };
 
-    const STORAGE_KEY = "asset_manager_data_v2";
+    const STORAGE_KEY = "asset_manager_data_v3";
 
     let appState = {
       snapshots: [INITIAL_SNAPSHOT_20260814, INITIAL_SNAPSHOT_20260922],
       currentSnapshotId: "2026-09-22",
       currencyView: "KRW",
+      assetClasses: [...DEFAULT_ASSET_CLASSES], // 동적 자산군 목록
       categorySafety: Object.assign({}, DEFAULT_CATEGORY_SAFETY),
       filterCategory: "ALL",
       filterSafe: "ALL",
@@ -1418,16 +1566,18 @@
     let doughnutChart = null;
     let historyChart = null;
 
+    // --------------------------------------------------------------------------
+    // 상태 로드 & 저장
+    // --------------------------------------------------------------------------
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed.snapshots && parsed.snapshots.length > 0) {
-            appState.snapshots = parsed.snapshots;
-          }
+          if (parsed.snapshots && parsed.snapshots.length > 0) appState.snapshots = parsed.snapshots;
           if (parsed.currentSnapshotId) appState.currentSnapshotId = parsed.currentSnapshotId;
           if (parsed.currencyView) appState.currencyView = parsed.currencyView;
+          if (parsed.assetClasses && parsed.assetClasses.length > 0) appState.assetClasses = parsed.assetClasses;
           if (parsed.categorySafety) appState.categorySafety = parsed.categorySafety;
           if (parsed.theme) appState.theme = parsed.theme;
         }
@@ -1447,6 +1597,7 @@
           snapshots: appState.snapshots,
           currentSnapshotId: appState.currentSnapshotId,
           currencyView: appState.currencyView,
+          assetClasses: appState.assetClasses,
           categorySafety: appState.categorySafety,
           theme: appState.theme
         }));
@@ -1463,6 +1614,9 @@
       return appState.snapshots.find(s => s.id === appState.currentSnapshotId) || appState.snapshots[0];
     }
 
+    // --------------------------------------------------------------------------
+    // 포맷팅 및 환율 변환 유틸
+    // --------------------------------------------------------------------------
     function formatMoney(amount, currency = appState.currencyView) {
       if (amount == null || isNaN(amount)) return "0";
       if (currency === "USD") {
@@ -1491,8 +1645,12 @@
       return appState.currencyView === "USD" ? evals.usd : evals.krw;
     }
 
+    // --------------------------------------------------------------------------
+    // 렌더링 총괄
+    // --------------------------------------------------------------------------
     function renderAll() {
       applyTheme();
+      renderCategoryTabs();
       updateSnapshotSelectOptions();
       renderKPIs();
       renderCharts();
@@ -1500,6 +1658,7 @@
       renderTable();
     }
 
+    // 3번째 요청: 통화 뷰 전환 (국기 포함)
     function setCurrencyView(curr) {
       appState.currencyView = curr;
       document.getElementById("currKRW").classList.toggle("active", curr === "KRW");
@@ -1507,7 +1666,7 @@
       document.querySelectorAll(".currency-label").forEach(el => el.textContent = curr);
       saveState();
       renderAll();
-      showToast(`${curr} 통화 기준 뷰로 전환되었습니다.`);
+      showToast(`${curr === 'KRW' ? '🇰🇷 KRW' : '🇺🇸 USD'} 통화 기준 뷰로 전환되었습니다.`);
     }
 
     function toggleTheme() {
@@ -1522,6 +1681,21 @@
       if (historyChart) historyChart.update();
     }
 
+    // 카테고리 탭 동적 생성 (6번째 요청: 자산군 추가 지원)
+    function renderCategoryTabs() {
+      const container = document.getElementById("categoryTabs");
+      const activeCat = appState.filterCategory;
+
+      let html = `<button class="cat-tab-btn ${activeCat === 'ALL' ? 'active' : ''}" onclick="setCategoryFilter('ALL')">전체 <span class="badge" id="badgeCountAll">0</span></button>`;
+      
+      appState.assetClasses.forEach(c => {
+        html += `<button class="cat-tab-btn ${activeCat === c ? 'active' : ''}" onclick="setCategoryFilter('${c}')">${c} <span class="badge" id="badgeCount${c}">0</span></button>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // 5번째 요청: 기록 날짜 드롭다운에서 '(21개 종목)' 문구 제외하고 YYYY-MM-DD만 표시
     function updateSnapshotSelectOptions() {
       const select = document.getElementById("snapshotSelect");
       const compareSelect = document.getElementById("compareDateSelect");
@@ -1533,7 +1707,7 @@
       appState.snapshots.forEach(s => {
         const opt = document.createElement("option");
         opt.value = s.id;
-        opt.textContent = `${s.date} (${s.items.length}개 종목)`;
+        opt.textContent = s.date; // 종목 수 문구 없이 날짜만!
         if (s.id === curSnapshot.id) opt.selected = true;
         select.appendChild(opt);
 
@@ -1550,7 +1724,9 @@
         compareSelect.selectedIndex = 0;
       }
 
-      document.getElementById("currentFxInput").value = curSnapshot.exchangeRate || 1350;
+      // 4번째 요청: 환율 입력칸 천 단위 쉼표 표기
+      const fxVal = curSnapshot.exchangeRate || 1350;
+      document.getElementById("currentFxInput").value = Number(fxVal).toLocaleString("ko-KR");
     }
 
     function onSnapshotChanged() {
@@ -1560,18 +1736,27 @@
       renderAll();
     }
 
-    function updateSnapshotFxRate(val) {
+    function formatFxInput(input) {
+      const num = Number(input.value.replace(/[^0-9]/g, '')) || 0;
+      input.value = num > 0 ? num.toLocaleString('ko-KR') : '';
+    }
+
+    function updateSnapshotFxRate(rawVal) {
+      const num = Number(String(rawVal).replace(/[^0-9]/g, '')) || 1350;
       const cur = getCurrentSnapshot();
-      cur.exchangeRate = Number(val) || 1350;
+      cur.exchangeRate = num;
       saveState();
       renderAll();
     }
     function applyFxRate() {
-      const val = document.getElementById("currentFxInput").value;
-      updateSnapshotFxRate(val);
-      showToast(`기준 환율이 ₩${Number(val).toLocaleString()}으로 적용되었습니다.`);
+      const input = document.getElementById("currentFxInput");
+      updateSnapshotFxRate(input.value);
+      showToast(`기준 환율이 ${input.value} KRW으로 적용되었습니다.`);
     }
 
+    // --------------------------------------------------------------------------
+    // 핵심 KPI 렌더링
+    // --------------------------------------------------------------------------
     function renderKPIs() {
       const cur = getCurrentSnapshot();
       const fx = cur.exchangeRate || 1350;
@@ -1666,14 +1851,18 @@
       }
     }
 
-    const CLASS_COLORS = {
-      "주식": "#3b5bdb",
-      "채권": "#0ca678",
-      "현금": "#228be6",
-      "금": "#f59f00",
-      "비트코인": "#f76707",
-      "리츠": "#ae3ec9"
-    };
+    // --------------------------------------------------------------------------
+    // 차트 렌더링
+    // --------------------------------------------------------------------------
+    const PALETTE = ["#3b5bdb", "#0ca678", "#228be6", "#f59f00", "#f76707", "#ae3ec9", "#1098ad", "#e64980", "#7048e8", "#82c91e"];
+
+    function getCategoryColor(cat, index) {
+      const fixed = {
+        "주식": "#3b5bdb", "채권": "#0ca678", "현금": "#228be6",
+        "금": "#f59f00", "비트코인": "#f76707", "리츠": "#ae3ec9"
+      };
+      return fixed[cat] || PALETTE[index % PALETTE.length];
+    }
 
     function renderCharts() {
       renderClassDoughnut();
@@ -1684,7 +1873,7 @@
       const cur = getCurrentSnapshot();
       const fx = cur.exchangeRate || 1350;
       const classMap = {};
-      ASSET_CLASSES.forEach(c => classMap[c] = 0);
+      appState.assetClasses.forEach(c => classMap[c] = 0);
 
       cur.items.forEach(it => {
         const ev = getItemEvalAmounts(it, fx);
@@ -1692,9 +1881,9 @@
         classMap[it.category] = (classMap[it.category] || 0) + val;
       });
 
-      const labels = ASSET_CLASSES;
+      const labels = appState.assetClasses;
       const data = labels.map(c => classMap[c]);
-      const colors = labels.map(c => CLASS_COLORS[c] || "#868e96");
+      const colors = labels.map((c, idx) => getCategoryColor(c, idx));
 
       const ctx = document.getElementById("classDoughnutChart").getContext("2d");
       if (doughnutChart) doughnutChart.destroy();
@@ -1834,7 +2023,7 @@
               ticks: {
                 color: appState.theme === "dark" ? "#9da5b4" : "#6c757d",
                 callback: function(val) {
-                  if (appState.currencyView === "USD") return "$" + (val >= 1000 ? (val/1000).toFixed(0) + "k" : val);
+                  if (appState.currencyView === "USD") return (val >= 1000 ? (val/1000).toFixed(0) + "k" : val.toLocaleString()) + " USD";
                   return (val >= 100000000 ? (val/100000000).toFixed(1) + "억" : (val/10000).toFixed(0) + "만");
                 }
               }
@@ -1844,11 +2033,27 @@
       });
     }
 
+    // --------------------------------------------------------------------------
+    // 7. 리밸런싱 도우미 & 추가 투자금 시뮬레이터 (7번째 요청)
+    // --------------------------------------------------------------------------
+    function formatCashInjectInput(input) {
+      const num = Number(input.value.replace(/[^0-9]/g, '')) || 0;
+      input.value = num > 0 ? num.toLocaleString('ko-KR') : '';
+    }
+
+    function setCashInject(amount) {
+      document.getElementById("cashInjectInput").value = Number(amount).toLocaleString('ko-KR');
+      renderRebalanceAndCompare();
+    }
+
     function renderRebalanceAndCompare() {
       const cur = getCurrentSnapshot();
       const compId = document.getElementById("compareDateSelect").value;
       const comp = appState.snapshots.find(s => s.id === compId) || appState.snapshots[0];
       const targetSafeRatio = Number(document.getElementById("targetSafeRatioInput").value) || 40;
+      const targetRiskRatio = 100 - targetSafeRatio;
+
+      document.getElementById("simTargetRatioDisplay").textContent = `${targetSafeRatio}% (위험 ${targetRiskRatio}%)`;
 
       const curFx = cur.exchangeRate || 1350;
       const compFx = comp.exchangeRate || 1350;
@@ -1896,7 +2101,7 @@
             ${totDiff >= 0 ? '+' : ''}${formatMoney(totDiff)}
           </div>
           <div style="font-size: 0.78rem; font-weight: 600; color: ${totDiff >= 0 ? 'var(--up)' : 'var(--down)'}">
-            ${totDiff >= 0 ? '+' : ''}${totDiffPct}% 상승
+            ${totDiff >= 0 ? '+' : ''}${totDiffPct}% 변동
           </div>
         </div>
 
@@ -1914,22 +2119,190 @@
         <div class="rebalance-item-box">
           <div class="rebalance-item-title">
             <span>환율 변동 영향</span>
-            <span>${compFx}원 ➔ ${curFx}원</span>
+            <span>${compFx} KRW ➔ ${curFx} KRW</span>
           </div>
           <div class="rebalance-item-val">
-            ${curFx - compFx >= 0 ? '+' : ''}${curFx - compFx}원
+            ${curFx - compFx >= 0 ? '+' : ''}${curFx - compFx} KRW
           </div>
           <div style="font-size: 0.76rem; color: var(--ink-3);">
             달러 자산의 원화 평가액에 즉시 반영됨
           </div>
         </div>
       `;
+
+      // 7번째 요청: 추가 투자금 투입 시뮬레이션 계산
+      const cashInputEl = document.getElementById("cashInjectInput");
+      const cashRaw = Number((cashInputEl ? cashInputEl.value : "0").replace(/[^0-9]/g, '')) || 0;
+      // 통화 뷰에 맞게 환산
+      const cashAmount = appState.currencyView === "USD" ? (curFx > 0 ? cashRaw / curFx : 0) : cashRaw;
+
+      const newTotal = curTot + cashAmount;
+      const targetSafeAfter = newTotal * (targetSafeRatio / 100);
+      const targetRiskAfter = newTotal * (targetRiskRatio / 100);
+
+      const needSafe = targetSafeAfter - curSafe;
+      const needRisk = targetRiskAfter - curRisk;
+
+      let safeAlloc = 0;
+      let riskAlloc = 0;
+
+      if (cashAmount > 0) {
+        if (needSafe <= 0) {
+          // 안전자산이 이미 충분하여 신규 자금 전액을 위험자산에 투입
+          safeAlloc = 0;
+          riskAlloc = cashAmount;
+        } else if (needRisk <= 0) {
+          // 위험자산이 이미 충분하여 신규 자금 전액을 안전자산에 투입
+          safeAlloc = cashAmount;
+          riskAlloc = 0;
+        } else {
+          // 둘 다 매수 필요: 신규 자금을 비율에 맞춰 배분
+          safeAlloc = Math.min(cashAmount, Math.max(0, needSafe));
+          riskAlloc = cashAmount - safeAlloc;
+        }
+      }
+
+      const postSafe = curSafe + safeAlloc;
+      const postRisk = curRisk + riskAlloc;
+      const postSafeRatio = newTotal > 0 ? ((postSafe / newTotal) * 100).toFixed(1) : "0.0";
+      const postRiskRatio = newTotal > 0 ? ((postRisk / newTotal) * 100).toFixed(1) : "0.0";
+
+      const injectBox = document.getElementById("cashInjectResultBox");
+      injectBox.innerHTML = `
+        <div class="rebalance-item-box" style="border-left: 4px solid var(--safe);">
+          <div class="rebalance-item-title">
+            <span>🛡️ 안전자산 매수 추천액</span>
+            <span style="color: var(--safe); font-weight: 700;">비중 ${(safeAlloc/cashAmount*100 || 0).toFixed(0)}%</span>
+          </div>
+          <div class="rebalance-item-val" style="color: var(--safe);">
+            ${formatMoney(safeAlloc)}
+          </div>
+          <div style="font-size: 0.76rem; color: var(--ink-3);">
+            현금, 채권, 금 등 안전자산 매수
+          </div>
+        </div>
+
+        <div class="rebalance-item-box" style="border-left: 4px solid var(--risk);">
+          <div class="rebalance-item-title">
+            <span>⚡ 위험자산 매수 추천액</span>
+            <span style="color: var(--risk); font-weight: 700;">비중 ${(riskAlloc/cashAmount*100 || 0).toFixed(0)}%</span>
+          </div>
+          <div class="rebalance-item-val" style="color: var(--risk);">
+            ${formatMoney(riskAlloc)}
+          </div>
+          <div style="font-size: 0.76rem; color: var(--ink-3);">
+            주식 등 위험자산 매수
+          </div>
+        </div>
+
+        <div class="rebalance-item-box">
+          <div class="rebalance-item-title">
+            <span>투자 후 예상 자산 & 비율</span>
+            <span>총 ${formatMoney(newTotal)}</span>
+          </div>
+          <div class="rebalance-item-val" style="font-size: 1.05rem;">
+            안전 ${postSafeRatio}% : 위험 ${postRiskRatio}%
+          </div>
+          <div style="font-size: 0.76rem; color: var(--accent); font-weight: 600;">
+            ✓ 목표 비율(${targetSafeRatio}:${targetRiskRatio})에 최적으로 도달
+          </div>
+        </div>
+      `;
     }
 
+    // --------------------------------------------------------------------------
+    // 8. 정렬 및 필터링 (2번째 요청 고도화)
+    // --------------------------------------------------------------------------
+    // 2번째 요청 (2): No 버튼 클릭 시 사용자 지정 종합 스마트 정렬
+    // 원칙 1: 안전자산 -> 위험자산 순서
+    // 원칙 2: 현금 - 채권 - 금 - 비트코인 - 리츠 - 주식 순서 (+ 추가된 자산군)
+    // 원칙 3: 평가금액에서 가장 큰 항목이 있는 위치계좌 먼저, 동일 계좌는 금액 내림차순
+    function sortSmartByRule() {
+      const cur = getCurrentSnapshot();
+      const fx = cur.exchangeRate || 1350;
+
+      // 2번 원칙 자산 순서 매핑
+      const categoryOrder = ["현금", "채권", "금", "비트코인", "리츠", "주식"];
+      appState.assetClasses.forEach(c => {
+        if (!categoryOrder.includes(c)) categoryOrder.push(c);
+      });
+
+      // 동일한 (안전/위험 + 카테고리) 내에서 계좌별 최대 평가금액 계산
+      const groupAccountMax = {};
+      cur.items.forEach(it => {
+        const groupKey = `${it.isSafe ? '1_SAFE' : '2_RISK'}_${it.category}`;
+        const acc = it.account || "미지정";
+        const evalAmt = getItemEvalAmounts(it, fx).krw;
+        if (!groupAccountMax[groupKey]) groupAccountMax[groupKey] = {};
+        if (!groupAccountMax[groupKey][acc] || evalAmt > groupAccountMax[groupKey][acc]) {
+          groupAccountMax[groupKey][acc] = evalAmt;
+        }
+      });
+
+      cur.items.sort((a, b) => {
+        // 원칙 1: 안전자산(true) 먼저 -> 위험자산(false) 나중
+        if (a.isSafe !== b.isSafe) return a.isSafe ? -1 : 1;
+
+        // 원칙 2: 카테고리 순서 (현금 -> 채권 -> 금 -> 비트코인 -> 리츠 -> 주식)
+        const idxA = categoryOrder.indexOf(a.category);
+        const idxB = categoryOrder.indexOf(b.category);
+        const orderA = idxA !== -1 ? idxA : 999;
+        const orderB = idxB !== -1 ? idxB : 999;
+        if (orderA !== orderB) return orderA - orderB;
+
+        // 원칙 3: 계좌별 최대 평가금액이 큰 계좌 우선
+        const groupKey = `${a.isSafe ? '1_SAFE' : '2_RISK'}_${a.category}`;
+        const accA = a.account || "미지정";
+        const accB = b.account || "미지정";
+        const maxA = (groupAccountMax[groupKey] && groupAccountMax[groupKey][accA]) || 0;
+        const maxB = (groupAccountMax[groupKey] && groupAccountMax[groupKey][accB]) || 0;
+
+        if (maxA !== maxB) {
+          return maxB - maxA; // 큰 최대금액을 가진 계좌 먼저
+        }
+
+        // 위치 계좌가 같다면 평가금액 내림차순
+        if (accA === accB) {
+          const evalA = getItemEvalAmounts(a, fx).krw;
+          const evalB = getItemEvalAmounts(b, fx).krw;
+          return evalB - evalA;
+        }
+
+        // 계좌명 가나다순
+        return accA.localeCompare(accB, 'ko-KR');
+      });
+
+      appState.sortKey = null; // 헤더 단일 정렬 해제
+      saveState();
+      renderTable();
+      showToast("규칙에 따라 종목이 스마트 정렬되었습니다 (안전/위험 ➔ 자산군 ➔ 계좌규모순).");
+    }
+
+    // 2번째 요청 (1): 일반 헤더 클릭 시 가나다-ABC-숫자/기호 오름차순/내림차순 정렬
+    function sortBy(key) {
+      if (appState.sortKey === key) {
+        appState.sortAsc = !appState.sortAsc;
+      } else {
+        appState.sortKey = key;
+        appState.sortAsc = true;
+      }
+
+      // 정렬 헤더 표시 업데이트
+      document.querySelectorAll("[id^='sort_']").forEach(el => el.textContent = "");
+      const arrowEl = document.getElementById(`sort_${key}`);
+      if (arrowEl) arrowEl.textContent = appState.sortAsc ? " ▲" : " ▼";
+
+      renderTable();
+    }
+
+    // --------------------------------------------------------------------------
+    // 테이블 렌더링
+    // --------------------------------------------------------------------------
     function setCategoryFilter(cat) {
       appState.filterCategory = cat;
       document.querySelectorAll(".cat-tab-btn").forEach(btn => {
-        btn.classList.toggle("active", btn.textContent.trim().startsWith(cat === "ALL" ? "전체" : cat));
+        const text = btn.textContent.trim();
+        btn.classList.toggle("active", (cat === "ALL" && text.startsWith("전체")) || text.startsWith(cat));
       });
       renderTable();
     }
@@ -1941,7 +2314,8 @@
       const tfoot = document.getElementById("assetTableFoot");
 
       let grandTotalKRW = 0, grandTotalUSD = 0;
-      const counts = { "ALL": cur.items.length, "주식": 0, "채권": 0, "현금": 0, "금": 0, "비트코인": 0, "리츠": 0 };
+      const counts = { "ALL": cur.items.length };
+      appState.assetClasses.forEach(c => counts[c] = 0);
 
       cur.items.forEach(it => {
         const ev = getItemEvalAmounts(it, fx);
@@ -1950,8 +2324,9 @@
         if (counts[it.category] !== undefined) counts[it.category]++;
       });
 
-      document.getElementById("badgeCountAll").textContent = counts["ALL"];
-      ASSET_CLASSES.forEach(c => {
+      const badgeAll = document.getElementById("badgeCountAll");
+      if (badgeAll) badgeAll.textContent = counts["ALL"];
+      appState.assetClasses.forEach(c => {
         const b = document.getElementById(`badgeCount${c}`);
         if (b) b.textContent = counts[c] || 0;
       });
@@ -1973,22 +2348,64 @@
           const matchName = (it.name || "").toLowerCase().includes(q);
           const matchAcc = (it.account || "").toLowerCase().includes(q);
           const matchMemo = (it.memo || "").toLowerCase().includes(q);
-          if (!matchName && !matchAcc && !matchMemo) return false;
+          const matchNote = (it.note || "").toLowerCase().includes(q);
+          if (!matchName && !matchAcc && !matchMemo && !matchNote) return false;
         }
         return true;
       });
+
+      // 단일 컬럼 정렬 (가나다-ABC-숫자/기호 순서)
+      if (appState.sortKey) {
+        filteredItems.sort((a, b) => {
+          let vA = a[appState.sortKey];
+          let vB = b[appState.sortKey];
+
+          if (appState.sortKey === "amount" || appState.sortKey === "evalAmount") {
+            vA = getItemDisplayAmount(a, fx);
+            vB = getItemDisplayAmount(b, fx);
+            return appState.sortAsc ? vA - vB : vB - vA;
+          }
+
+          if (appState.sortKey === "isSafe") {
+            vA = a.isSafe ? 1 : 0;
+            vB = b.isSafe ? 1 : 0;
+            return appState.sortAsc ? vB - vA : vA - vB;
+          }
+
+          if (appState.sortKey === "fxExposed") {
+            vA = a.fxExposed ? 1 : 0;
+            vB = b.fxExposed ? 1 : 0;
+            return appState.sortAsc ? vB - vA : vA - vB;
+          }
+
+          const strA = String(vA || "");
+          const strB = String(vB || "");
+          const cmp = strA.localeCompare(strB, 'ko-KR', { numeric: true, sensitivity: 'base' });
+          return appState.sortAsc ? cmp : -cmp;
+        });
+      }
 
       let subTotalDisplay = 0;
       tbody.innerHTML = "";
 
       if (filteredItems.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" style="text-align: center; padding: 32px; color: var(--ink-3);">조건에 해당하는 종목이 없습니다.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="13" style="text-align: center; padding: 32px; color: var(--ink-3);">조건에 해당하는 종목이 없습니다.</td></tr>`;
       } else {
         filteredItems.forEach((item, index) => {
           const ev = getItemEvalAmounts(item, fx);
           const displayAmt = appState.currencyView === "USD" ? ev.usd : ev.krw;
           subTotalDisplay += displayAmt;
           const ratio = grandTotalDisplay > 0 ? ((displayAmt / grandTotalDisplay) * 100).toFixed(1) : "0.0";
+
+    const FLAG_KR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" width="18" height="12" style="border-radius:2px;vertical-align:middle;display:inline-block;border:1px solid rgba(0,0,0,0.15);"><rect width="300" height="200" fill="#fff"/><path transform="rotate(-33.69,150,100)" d="M150,50 A50,50 0 0,1 150,150 A25,25 0 0,1 150,100 A25,25 0 0,0 150,50 Z" fill="#cd2e3a"/><path transform="rotate(-33.69,150,100)" d="M150,50 A50,50 0 0,0 150,150 A25,25 0 0,0 150,100 A25,25 0 0,1 150,50 Z" fill="#0047a0"/><g transform="rotate(-33.69,68,44)"><rect x="38" y="30" width="60" height="8" fill="#000"/><rect x="38" y="43" width="60" height="8" fill="#000"/><rect x="38" y="56" width="60" height="8" fill="#000"/></g><g transform="rotate(-33.69,232,156)"><rect x="202" y="142" width="27" height="8" fill="#000"/><rect x="233" y="142" width="27" height="8" fill="#000"/><rect x="202" y="155" width="27" height="8" fill="#000"/><rect x="233" y="155" width="27" height="8" fill="#000"/><rect x="202" y="168" width="27" height="8" fill="#000"/><rect x="233" y="168" width="27" height="8" fill="#000"/></g><g transform="rotate(-33.69,232,44)"><rect x="202" y="30" width="27" height="8" fill="#000"/><rect x="233" y="30" width="27" height="8" fill="#000"/><rect x="202" y="43" width="60" height="8" fill="#000"/><rect x="202" y="56" width="27" height="8" fill="#000"/><rect x="233" y="56" width="27" height="8" fill="#000"/></g><g transform="rotate(-33.69,68,156)"><rect x="38" y="142" width="60" height="8" fill="#000"/><rect x="38" y="155" width="27" height="8" fill="#000"/><rect x="69" y="155" width="27" height="8" fill="#000"/><rect x="38" y="168" width="60" height="8" fill="#000"/></g></svg>`;
+    const FLAG_US_SVG = `<svg class="flag-icon" viewBox="0 0 741 390" width="18" height="12" style="border-radius:2px; vertical-align:middle; display:inline-block; border:1px solid rgba(0,0,0,0.15);"><rect width="741" height="390" fill="#bb133e"/><path d="M0,30H741M0,90H741M0,150H741M0,210H741M0,270H741M0,330H741" stroke="#fff" stroke-width="30"/><rect width="296.4" height="210" fill="#002147"/><g fill="#fff"><path d="M24.7,15l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M74.1,15l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M123.5,15l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M172.9,15l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M222.3,15l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M271.7,15l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M49.4,36l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M98.8,36l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M148.2,36l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M197.6,36l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M247,36l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M24.7,57l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M74.1,57l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M123.5,57l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M172.9,57l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M222.3,57l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M271.7,57l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M49.4,78l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M98.8,78l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M148.2,78l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M197.6,78l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M247,78l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M24.7,99l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M74.1,99l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M123.5,99l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M172.9,99l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M222.3,99l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M271.7,99l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M49.4,120l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M98.8,120l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M148.2,120l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M197.6,120l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M247,120l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M24.7,141l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M74.1,141l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M123.5,141l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M172.9,141l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M222.3,141l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M271.7,141l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M49.4,162l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M98.8,162l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M148.2,162l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M197.6,162l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M247,162l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/><path d="M24.7,183l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M74.1,183l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M123.5,183l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M172.9,183l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M222.3,183l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z M271.7,183l2,6h6l-5,4 2,6-5-4-5,4 2-6-5-4h6z"/></g></svg>`;
+
+          // 3번째 요청: 국기 SVG 표시 (KRW / USD)
+          const curr = item.currency || 'KRW';
+          const flagSvg = curr === 'KRW' ? FLAG_KR_SVG : FLAG_US_SVG;
+
+          // 4번째 요청: 입력 금액 천 단위 콤마 포맷팅 문자열
+          const formattedAmount = Number(item.amount || 0).toLocaleString("ko-KR");
 
           const tr = document.createElement("tr");
           tr.dataset.id = item.id;
@@ -2000,20 +2417,25 @@
               </button>
             </td>
             <td>
-              <select class="inline-input" style="font-weight: 600; width: 85px;" onchange="updateItemField('${item.id}', 'category', this.value)">
-                ${ASSET_CLASSES.map(c => `<option value="${c}" ${item.category === c ? 'selected' : ''}>${c}</option>`).join("")}
+              <select class="inline-input" style="font-weight: 600; width: 90px;" onchange="updateItemField('${item.id}', 'category', this.value)">
+                ${appState.assetClasses.map(c => `<option value="${c}" ${item.category === c ? 'selected' : ''}>${c}</option>`).join("")}
               </select>
             </td>
             <td>
               <input type="text" class="inline-input" style="font-weight: 600;" value="${escapeHtml(item.name)}" onchange="updateItemField('${item.id}', 'name', this.value)">
             </td>
             <td style="text-align: center;">
-              <span class="currency-pill" onclick="toggleItemCurrency('${item.id}')" title="클릭하여 통화(KRW/USD) 전환">
-                ${item.currency || 'KRW'}
+              <!-- 3번째 요청: 국기 포함 뱃지 -->
+              <span class="currency-flag-badge" onclick="toggleItemCurrency('${item.id}')" title="클릭하여 통화(KRW/USD) 전환">
+                <span>${flagSvg}</span>
+                <span>${curr}</span>
               </span>
             </td>
+            <!-- 4번째 요청: 쉼표 포맷팅 및 마우스 스피너 없는 텍스트 입력창 -->
             <td style="text-align: right;">
-              <input type="number" class="inline-input amount" value="${item.amount || 0}" step="any" onchange="updateItemField('${item.id}', 'amount', Number(this.value))">
+              <input type="text" class="inline-input amount" value="${formattedAmount}" 
+                     oninput="formatTableRowAmount(this)"
+                     onchange="updateItemAmountFromFormatted('${item.id}', this.value)">
             </td>
             <td style="text-align: right; font-weight: 700;">
               ${formatMoney(displayAmt)}
@@ -2026,11 +2448,15 @@
             </td>
             <td style="text-align: center;">
               <button class="fx-toggle-btn ${item.fxExposed ? 'y' : 'n'}" onclick="toggleItemFx('${item.id}')" title="환노출 Y/N 클릭 토글">
-                ${item.fxExposed ? 'Y (노출)' : 'N (헤지/원화)'}
+                ${item.fxExposed ? 'Y (노출)' : 'N (헤지)'}
               </button>
             </td>
             <td>
-              <input type="text" class="inline-input" value="${escapeHtml(item.memo || '')}" placeholder="메모" onchange="updateItemField('${item.id}', 'memo', this.value)">
+              <input type="text" class="inline-input" value="${escapeHtml(item.memo || '')}" placeholder="비고 입력" onchange="updateItemField('${item.id}', 'memo', this.value)">
+            </td>
+            <!-- 1번째 요청: 비고 옆 별도 상세 메모 공간 -->
+            <td>
+              <input type="text" class="inline-input" style="color: var(--accent); font-weight: 500;" value="${escapeHtml(item.note || '')}" placeholder="클릭하여 메모..." onchange="updateItemField('${item.id}', 'note', this.value)">
             </td>
             <td style="text-align: center;">
               <button class="row-del-btn" onclick="deleteItemRow('${item.id}')" title="종목 삭제">✕</button>
@@ -2047,9 +2473,20 @@
           <td style="text-align: right;">-</td>
           <td style="text-align: right; color: var(--accent); font-size: 0.95rem;">${formatMoney(subTotalDisplay)}</td>
           <td style="text-align: right;">${subRatio}%</td>
-          <td colspan="4" style="color: var(--ink-3); font-size: 0.78rem;">전체 총자산: ${formatMoney(grandTotalDisplay)}</td>
+          <td colspan="5" style="color: var(--ink-3); font-size: 0.78rem;">전체 총자산: ${formatMoney(grandTotalDisplay)}</td>
         </tr>
       `;
+    }
+
+    // 4번째 요청: 입력 금액 천 단위 실시간 쉼표 적용 및 파싱
+    function formatTableRowAmount(input) {
+      const num = Number(input.value.replace(/[^0-9]/g, '')) || 0;
+      input.value = num > 0 ? num.toLocaleString('ko-KR') : '';
+    }
+
+    function updateItemAmountFromFormatted(itemId, formattedVal) {
+      const num = Number(String(formattedVal).replace(/[^0-9]/g, '')) || 0;
+      updateItemField(itemId, 'amount', num);
     }
 
     function updateItemField(itemId, field, value) {
@@ -2076,6 +2513,7 @@
       showToast(`${it.name} ➔ ${it.isSafe ? '안전자산' : '위험자산'}으로 변경되었습니다.`);
     }
 
+    // 3번째 요청: 국기 포함 통화 토글
     function toggleItemCurrency(itemId) {
       const cur = getCurrentSnapshot();
       const it = cur.items.find(x => x.id === itemId);
@@ -2093,7 +2531,7 @@
 
       saveState();
       renderAll();
-      showToast(`${it.name} 입력 통화가 ${nextCurr}로 전환되었습니다.`);
+      showToast(`${it.name} 통화가 ${nextCurr === 'KRW' ? '🇰🇷 KRW' : '🇺🇸 USD'}로 전환되었습니다.`);
     }
 
     function toggleItemFx(itemId) {
@@ -2107,7 +2545,7 @@
 
     function addNewItemRow() {
       const cur = getCurrentSnapshot();
-      const defCat = appState.filterCategory !== "ALL" ? appState.filterCategory : "주식";
+      const defCat = appState.filterCategory !== "ALL" ? appState.filterCategory : (appState.assetClasses[0] || "주식");
       const isSafe = appState.categorySafety[defCat] !== undefined ? appState.categorySafety[defCat] : false;
 
       const newItem = {
@@ -2119,7 +2557,8 @@
         amount: 0,
         account: "",
         fxExposed: false,
-        memo: ""
+        memo: "",
+        note: ""
       };
 
       cur.items.unshift(newItem);
@@ -2139,6 +2578,9 @@
       showToast(`'${it.name}' 종목이 삭제되었습니다.`);
     }
 
+    // --------------------------------------------------------------------------
+    // 9. 스냅샷 관리
+    // --------------------------------------------------------------------------
     let isCopySnapshotMode = false;
 
     function openAddSnapshotModal(copyMode = false) {
@@ -2150,7 +2592,8 @@
 
       const todayStr = new Date().toISOString().slice(0, 10);
       document.getElementById("newSnapshotDate").value = todayStr;
-      document.getElementById("newSnapshotFx").value = cur.exchangeRate || 1350;
+      const fxVal = cur.exchangeRate || 1350;
+      document.getElementById("newSnapshotFx").value = Number(fxVal).toLocaleString("ko-KR");
 
       if (copyMode) {
         title.textContent = `현재 기록(${cur.date}) 복제하여 새 날짜 추가`;
@@ -2165,7 +2608,9 @@
 
     function submitAddSnapshot() {
       const dateVal = document.getElementById("newSnapshotDate").value.trim();
-      const fxVal = Number(document.getElementById("newSnapshotFx").value) || 1350;
+      const fxRaw = document.getElementById("newSnapshotFx").value;
+      const fxVal = Number(String(fxRaw).replace(/[^0-9]/g, '')) || 1350;
+
       if (!dateVal) {
         alert("날짜를 선택해 주세요.");
         return;
@@ -2216,41 +2661,85 @@
       showToast(`'${cur.date}' 기록이 삭제되었습니다.`);
     }
 
+    // --------------------------------------------------------------------------
+    // 10. 자산분류 설정 및 새 자산군 추가 (6번째 요청)
+    // --------------------------------------------------------------------------
     function openCategorySettingsModal() {
+      renderCategorySettingsList();
+      openModal("categorySettingsModal");
+    }
+
+    function renderCategorySettingsList() {
       const list = document.getElementById("categoryDefaultsList");
       list.innerHTML = "";
 
-      ASSET_CLASSES.forEach(cat => {
+      appState.assetClasses.forEach(cat => {
         const isSafe = appState.categorySafety[cat] !== undefined ? appState.categorySafety[cat] : false;
+        const isDefault = DEFAULT_ASSET_CLASSES.includes(cat);
+
         const row = document.createElement("div");
         row.className = "category-setting-row";
         row.innerHTML = `
-          <span class="category-setting-name">${cat}</span>
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="font-size: 0.78rem; font-weight: 600; color: ${isSafe ? 'var(--safe)' : 'var(--risk)'}">
-              ${isSafe ? '🛡️ 안전자산' : '⚡ 위험자산'}
-            </span>
+            <span class="category-setting-name">${cat}</span>
+            ${!isDefault ? `<span style="font-size: 0.68rem; background: var(--accent-soft); color: var(--accent); padding: 1px 6px; border-radius: 4px; font-weight: 600;">사용자 추가</span>` : ''}
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
             <select class="select-style" style="padding: 4px 8px; font-size: 0.8rem;" id="setSafe_${cat}">
-              <option value="true" ${isSafe ? 'selected' : ''}>안전자산으로 분류</option>
-              <option value="false" ${!isSafe ? 'selected' : ''}>위험자산으로 분류</option>
+              <option value="true" ${isSafe ? 'selected' : ''}>🛡️ 안전자산</option>
+              <option value="false" ${!isSafe ? 'selected' : ''}>⚡ 위험자산</option>
             </select>
+            ${!isDefault ? `<button class="ios-btn" style="padding: 3px 7px; color: #e03131; font-size: 0.72rem;" onclick="removeCustomCategory('${cat}')" title="자산군 삭제">삭제</button>` : ''}
           </div>
         `;
         list.appendChild(row);
       });
+    }
 
-      openModal("categorySettingsModal");
+    // 6번째 요청: 사용자가 원하는 자산군 직접 추가
+    function addNewCategory() {
+      const input = document.getElementById("newCategoryName");
+      const name = input.value.trim();
+      const isSafe = document.getElementById("newCategorySafety").value === "true";
+
+      if (!name) {
+        alert("자산군 이름을 입력해주세요 (예: 부동산)");
+        return;
+      }
+      if (appState.assetClasses.includes(name)) {
+        alert(`'${name}' 자산군은 이미 존재합니다.`);
+        return;
+      }
+
+      appState.assetClasses.push(name);
+      appState.categorySafety[name] = isSafe;
+      input.value = "";
+
+      saveState();
+      renderCategorySettingsList();
+      renderAll();
+      showToast(`'${name}' 자산군이 추가되었습니다.`);
+    }
+
+    function removeCustomCategory(name) {
+      if (!confirm(`'${name}' 자산군을 삭제하시겠습니까?`)) return;
+      appState.assetClasses = appState.assetClasses.filter(c => c !== name);
+      delete appState.categorySafety[name];
+      saveState();
+      renderCategorySettingsList();
+      renderAll();
+      showToast(`'${name}' 자산군이 삭제되었습니다.`);
     }
 
     function saveCategorySettings() {
-      ASSET_CLASSES.forEach(cat => {
+      appState.assetClasses.forEach(cat => {
         const el = document.getElementById(`setSafe_${cat}`);
         if (el) {
           appState.categorySafety[cat] = el.value === "true";
         }
       });
 
-      if (confirm("새로운 기본 설정에 맞추어 현재 기록된 종목들의 안전/위험 분류도 함께 동기화하시겠습니까? (취소 시 기존 종목 분류 유지)")) {
+      if (confirm("변경된 안전/위험 설정에 맞추어 현재 기록된 종목들의 안전/위험 분류도 함께 동기화하시겠습니까? (취소 시 기존 종목 분류 유지)")) {
         const cur = getCurrentSnapshot();
         cur.items.forEach(it => {
           if (appState.categorySafety[it.category] !== undefined) {
@@ -2265,13 +2754,16 @@
       showToast("자산 분류 설정이 저장되었습니다.");
     }
 
+    // --------------------------------------------------------------------------
+    // 11. 엑셀 연동 (8번째 요청: 샘플 템플릿 금액 10만원 통일)
+    // --------------------------------------------------------------------------
     function exportToExcel() {
       const cur = getCurrentSnapshot();
       const fx = cur.exchangeRate || 1350;
 
       let totalKRW = 0, safeKRW = 0, riskKRW = 0;
       const classMap = {};
-      ASSET_CLASSES.forEach(c => classMap[c] = 0);
+      appState.assetClasses.forEach(c => classMap[c] = 0);
 
       cur.items.forEach(it => {
         const ev = getItemEvalAmounts(it, fx);
@@ -2295,13 +2787,14 @@
         ["자산군별 비중", "평가액 (KRW)", "비중 (%)"]
       ];
 
-      ASSET_CLASSES.forEach(c => {
+      appState.assetClasses.forEach(c => {
         const val = classMap[c] || 0;
         const pct = totalKRW > 0 ? ((val / totalKRW) * 100).toFixed(1) + "%" : "0%";
         summaryData.push([c, val, pct]);
       });
 
-      const thingsHeader = ["일자", "안전/위험", "자산 구분", "종목", "금액", "입력통화", "원화 환산액", "달러 환산액", "비중(%)", "위치 계좌", "환노출 여부", "비고"];
+      // 1번째 요청: 비고 및 메모 열 분리
+      const thingsHeader = ["일자", "안전/위험", "자산 구분", "종목", "금액", "입력통화", "원화 환산액", "달러 환산액", "비중(%)", "위치 계좌", "환노출 여부", "비고", "상세메모"];
       const thingsData = [thingsHeader];
 
       cur.items.forEach(it => {
@@ -2319,7 +2812,8 @@
           pct,
           it.account || "",
           it.fxExposed ? "Y" : "N",
-          it.memo || ""
+          it.memo || "",
+          it.note || ""
         ]);
       });
 
@@ -2350,21 +2844,23 @@
       showToast(`엑셀 리포트 '${filename}'가 다운로드되었습니다.`);
     }
 
+    // 8번째 요청: 자산입력 샘플 템플릿 금액 모두 십만원(100,000)으로 통일!
     function downloadSampleTemplate() {
       const templateData = [
-        ["일자", "안전/위험", "자산 구분", "종목", "금액", "위치 계좌", "환노출 여부", "비고"],
-        ["2026-08-14", "안전", "현금", "예금", 400000, "토스뱅크", "N", "신규"],
-        ["2026-08-14", "안전", "현금", "CMA", 2800000, "미래에셋", "N", "연금저축"],
-        ["2026-08-14", "안전", "채권", "SGOV", 7000000, "키움증권", "Y", ""],
-        ["2026-08-14", "안전", "금", "금현물", 14000000, "미래에셋", "Y", ""],
-        ["2026-08-14", "안전", "비트코인", "비트코인", 12000000, "빗썸", "Y", ""],
-        ["2026-08-14", "위험", "주식", "엔비디아", 10500000, "키움증권", "Y", "해외주식"]
+        ["일자", "안전/위험", "자산 구분", "종목", "금액", "위치 계좌", "환노출 여부", "비고", "상세메모"],
+        ["2026-08-14", "안전", "현금", "예금", 100000, "토스뱅크", "N", "신규", "비상금"],
+        ["2026-08-14", "안전", "현금", "CMA", 100000, "미래에셋", "N", "연금저축", ""],
+        ["2026-08-14", "안전", "채권", "SGOV", 100000, "키움증권", "Y", "", "미국 단기국채"],
+        ["2026-08-14", "안전", "금", "금현물", 100000, "미래에셋", "Y", "", "KRX 금시장"],
+        ["2026-08-14", "안전", "비트코인", "비트코인", 100000, "빗썸", "Y", "", ""],
+        ["2026-08-14", "안전", "리츠", "리얼티인컴", 100000, "키움증권", "Y", "해외계좌", "월배당"],
+        ["2026-08-14", "위험", "주식", "엔비디아", 100000, "키움증권", "Y", "해외주식", "AI 대장주"]
       ];
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.aoa_to_sheet(templateData);
       XLSX.utils.book_append_sheet(wb, ws, "things");
       XLSX.writeFile(wb, "자산입력_샘플템플릿.xlsx");
-      showToast("샘플 엑셀 템플릿이 다운로드되었습니다.");
+      showToast("샘플 엑셀 템플릿(금액 십만원 통일)이 다운로드되었습니다.");
     }
 
     function openExcelUploadModal() {
@@ -2389,7 +2885,7 @@
           }
 
           let headerRowIndex = 0;
-          let colMap = { date: -1, safe: -1, category: -1, name: -1, amount: -1, account: -1, fx: -1, memo: -1 };
+          let colMap = { date: -1, safe: -1, category: -1, name: -1, amount: -1, account: -1, fx: -1, memo: -1, note: -1 };
 
           for (let r = 0; r < Math.min(json.length, 5); r++) {
             const row = json[r];
@@ -2402,7 +2898,8 @@
               if (str.includes("금액")) colMap.amount = c;
               if (str.includes("계좌") || str.includes("위치")) colMap.account = c;
               if (str.includes("환노출")) colMap.fx = c;
-              if (str.includes("비고") || str.includes("메모")) colMap.memo = c;
+              if (str.includes("비고")) colMap.memo = c;
+              if (str.includes("메모")) colMap.note = c;
             });
             if (colMap.name !== -1 && colMap.amount !== -1) {
               headerRowIndex = r;
@@ -2418,6 +2915,7 @@
           if (colMap.account === -1) colMap.account = 5;
           if (colMap.fx === -1) colMap.fx = 6;
           if (colMap.memo === -1) colMap.memo = 7;
+          if (colMap.note === -1) colMap.note = 8;
 
           const itemsByDate = {};
           for (let r = headerRowIndex + 1; r < json.length; r++) {
@@ -2440,21 +2938,29 @@
             const accountStr = String(row[colMap.account] || "").trim();
             const fxStr = String(row[colMap.fx] || "").trim().toUpperCase();
             const memoStr = String(row[colMap.memo] || "").trim();
+            const noteStr = colMap.note !== -1 ? String(row[colMap.note] || "").trim() : "";
 
             const amountNum = Number(String(rawAmount).replace(/[^0-9.-]+/g, "")) || 0;
             const isSafe = safeStr.includes("안전") ? true : (safeStr.includes("위험") ? false : (appState.categorySafety[categoryStr] || false));
+
+            // 새 자산군 자동 등록
+            if (categoryStr && !appState.assetClasses.includes(categoryStr)) {
+              appState.assetClasses.push(categoryStr);
+              appState.categorySafety[categoryStr] = isSafe;
+            }
 
             if (!itemsByDate[dateVal]) itemsByDate[dateVal] = [];
             itemsByDate[dateVal].push({
               id: "item-" + Math.random().toString(36).slice(2, 9),
               isSafe: isSafe,
-              category: ASSET_CLASSES.includes(categoryStr) ? categoryStr : "주식",
+              category: categoryStr || "주식",
               name: name || "미지정 종목",
               currency: "KRW",
               amount: amountNum,
               account: accountStr,
               fxExposed: fxStr.includes("Y") || fxStr.includes("환노출"),
-              memo: memoStr
+              memo: memoStr,
+              note: noteStr
             });
           }
 
@@ -2504,6 +3010,9 @@
       }, false);
     }
 
+    // --------------------------------------------------------------------------
+    // 모달 & 토스트 헬퍼
+    // --------------------------------------------------------------------------
     function openModal(id) {
       document.getElementById(id).classList.add("active");
     }
