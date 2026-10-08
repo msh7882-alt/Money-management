@@ -1691,6 +1691,9 @@
       } catch (e) {
         console.error("로컬 스토리지 저장 실패", e);
       }
+      if (typeof saveStateToCloud === "function") {
+        saveStateToCloud();
+      }
     }
 
     function sortSnapshots() {
