@@ -9,8 +9,83 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   
-  <!-- Supabase JS Client -->
+
+<!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script>
+    // --------------------------------------------------------------------------
+    // Supabase 무소음 자동 클라우드 동기화 (로그인/버튼 없음)
+    // --------------------------------------------------------------------------
+    const SUPABASE_URL = "https://wgotvpcpcfvpcjmterep.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indnb3R2cGNwY2Z2cGNqbXRlcmVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0NjU3NTEsImV4cCI6MjEwNzA0MTc1MX0.E2HY8WqJIBRjfggn4B0Mo3LfYg3FjXhc43mxx-xdg9M";
+
+    let supabaseClient = null;
+    if (window.supabase) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    const SINGLE_USER_ID = "00000000-0000-0000-0000-000000000001";
+    let isCloudSyncing = false;
+
+    async function initSupabaseCloud() {
+      if (!supabaseClient) return;
+      await fetchCloudData();
+    }
+
+    async function fetchCloudData() {
+      if (!supabaseClient || isCloudSyncing) return;
+      isCloudSyncing = true;
+      try {
+        const { data, error } = await supabaseClient
+          .from("user_assets")
+          .select("*")
+          .eq("user_id", SINGLE_USER_ID)
+          .maybeSingle();
+
+        if (error) {
+          console.warn("클라우드 조회 중 (단일 사용자):", error.message);
+          return;
+        }
+
+        if (data && data.snapshots && data.snapshots.length > 0) {
+          appState.snapshots = data.snapshots;
+          if (data.asset_classes && data.asset_classes.length > 0) appState.assetClasses = data.asset_classes;
+          sortSnapshots();
+          renderAll();
+        } else {
+          await saveStateToCloud();
+        }
+      } catch (err) {
+        console.error("클라우드 동기화 예외:", err);
+      } finally {
+        isCloudSyncing = false;
+      }
+    }
+
+    async function saveStateToCloud() {
+      if (!supabaseClient || isCloudSyncing) return;
+      isCloudSyncing = true;
+      try {
+        const payload = {
+          user_id: SINGLE_USER_ID,
+          snapshots: appState.snapshots,
+          asset_classes: appState.assetClasses,
+          updated_at: new Date().toISOString()
+        };
+
+        const { error } = await supabaseClient
+          .from("user_assets")
+          .upsert(payload, { onConflict: "user_id" });
+
+        if (error) {
+          console.error("클라우드 저장 실패:", error);
+        }
+      } catch (err) {
+        console.error("클라우드 저장 예외:", err);
+      } finally {
+        isCloudSyncing = false;
+      }
+    }
   <!-- Chart.js & SheetJS (xlsx) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -1029,14 +1104,6 @@
           </button>
         </div>
 
-        <!-- Supabase 구글/이메일 클라우드 동기화 버튼 -->
-        <button class="ios-btn" id="authBtn" onclick="openAuthModal()" style="background: rgba(59,91,219,0.12); color: var(--accent); font-weight:600;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-          </svg>
-          <span id="authBtnText">동기화 로그인</span>
-        </button>
         <!-- 엑셀 내보내기/업로드 버튼 -->
         <button class="ios-btn" onclick="exportToExcel()" title="정리된 엑셀 리포트 다운로드">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1480,47 +1547,7 @@
     </div>
   </div>
 
-  <!-- 7) Supabase 클라우드 동기화 로그인/회원가입 모달 -->
-  <div class="modal-backdrop" id="authModal">
-    <div class="modal-sheet" style="max-width: 420px;">
-      <div class="modal-head">
-        <div>
-          <h3 class="modal-title" id="authModalTitle">실시간 클라우드 동기화</h3>
-          <p class="modal-sub">스마트폰과 PC 간에 실시간으로 자산 데이터를 동기화합니다.</p>
-        </div>
-        <button class="ios-btn" onclick="closeModal('authModal')">✕</button>
-      </div>
-      <div class="modal-body">
-        <div id="authLoggedInView" style="display: none; text-align: center; padding: 10px 0;">
-          <div style="font-size: 2.5rem; margin-bottom: 8px;">☁️</div>
-          <div style="font-weight: 700; font-size: 1.05rem; margin-bottom: 4px;" id="userEmailDisplay">user@example.com</div>
-          <div style="font-size: 0.8rem; color: var(--safe); font-weight: 600; margin-bottom: 16px;">✓ 클라우드 동기화 활성화됨</div>
-          <button class="ios-btn" style="width: 100%; justify-content: center; color: var(--risk); background: var(--risk-bg);" onclick="handleSignOut()">로그아웃</button>
-        </div>
-
-        <div id="authLoggedOutView">
-          <div style="display: flex; gap: 8px; margin-bottom: 16px; background: rgba(0,0,0,0.04); padding: 4px; border-radius: var(--radius-md);">
-            <button class="ios-btn" id="authTabLogin" style="flex:1; justify-content:center; background: var(--panel-solid);" onclick="switchAuthTab('login')">로그인</button>
-            <button class="ios-btn" id="authTabSignup" style="flex:1; justify-content:center; background: transparent;" onclick="switchAuthTab('signup')">회원가입</button>
-          </div>
-
-          <div class="form-group">
-            <label for="authEmail">이메일 주소</label>
-            <input type="email" id="authEmail" class="form-control" placeholder="example@email.com">
-          </div>
-          <div class="form-group">
-            <label for="authPassword">비밀번호</label>
-            <input type="password" id="authPassword" class="form-control" placeholder="6자리 이상 입력" onkeyup="if(event.key==='Enter') handleAuthSubmit()">
-          </div>
-
-          <div style="margin-top: 18px;">
-            <button class="ios-btn primary" id="authSubmitBtn" style="width: 100%; justify-content: center; font-weight: 700;" onclick="handleAuthSubmit()">로그인</button>
-          </div>
-          <div style="font-size: 0.76rem; color: var(--ink-3); text-align: center; margin-top: 12px;">
-            로그인하시면 스마트폰과 PC 어디서든 수정한 내용이 자동으로 동기화됩니다.
-          </div>
-        </div>
-      </div>
+  
       <div class="modal-foot">
         <button class="ios-btn" onclick="closeModal('authModal')">닫기</button>
       </div>
@@ -1649,184 +1676,7 @@
     }
 
 
-    // --------------------------------------------------------------------------
-    // Supabase 클라우드 동기화 서비스
-    // --------------------------------------------------------------------------
-    const SUPABASE_URL = "https://wgotvpcpcfvpcjmterep.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indnb3R2cGNwY2Z2cGNqbXRlcmVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0NjU3NTEsImV4cCI6MjEwNzA0MTc1MX0.E2HY8WqJIBRjfggn4B0Mo3LfYg3FjXhc43mxx-xdg9M";
-
-    let supabaseClient = null;
-    if (window.supabase) {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-
-    let currentUser = null;
-    let isCloudSyncing = false;
-    let authMode = "login";
-
-    async function initSupabaseAuth() {
-      if (!supabaseClient) return;
-      
-      const { data: { session } } = await supabaseClient.auth.getSession();
-      if (session && session.user) {
-        onUserAuthenticated(session.user);
-      } else {
-        updateAuthBtnUI(null);
-      }
-
-      supabaseClient.auth.onAuthStateChange(async (event, session) => {
-        if (session && session.user) {
-          onUserAuthenticated(session.user);
-        } else {
-          currentUser = null;
-          updateAuthBtnUI(null);
-        }
-      });
-    }
-
-    async function onUserAuthenticated(user) {
-      currentUser = user;
-      updateAuthBtnUI(user);
-      showToast(`☁️ ${user.email} 계정 동기화 연결됨`);
-      await fetchCloudData();
-    }
-
-    function updateAuthBtnUI(user) {
-      const btnText = document.getElementById("authBtnText");
-      const loggedInView = document.getElementById("authLoggedInView");
-      const loggedOutView = document.getElementById("authLoggedOutView");
-      const emailDisp = document.getElementById("userEmailDisplay");
-
-      if (user) {
-        if (btnText) btnText.textContent = user.email.split("@")[0] + " (동기화중)";
-        if (loggedInView) loggedInView.style.display = "block";
-        if (loggedOutView) loggedOutView.style.display = "none";
-        if (emailDisp) emailDisp.textContent = user.email;
-      } else {
-        if (btnText) btnText.textContent = "동기화 로그인";
-        if (loggedInView) loggedInView.style.display = "none";
-        if (loggedOutView) loggedOutView.style.display = "block";
-      }
-    }
-
-    function openAuthModal() {
-      openModal("authModal");
-    }
-
-    function switchAuthTab(mode) {
-      authMode = mode;
-      const tabLogin = document.getElementById("authTabLogin");
-      const tabSignup = document.getElementById("authTabSignup");
-      const submitBtn = document.getElementById("authSubmitBtn");
-
-      if (mode === "login") {
-        tabLogin.style.background = "var(--panel-solid)";
-        tabSignup.style.background = "transparent";
-        submitBtn.textContent = "로그인";
-      } else {
-        tabSignup.style.background = "var(--panel-solid)";
-        tabLogin.style.background = "transparent";
-        submitBtn.textContent = "회원가입";
-      }
-    }
-
-    async function handleAuthSubmit() {
-      if (!supabaseClient) {
-        alert("Supabase SDK 로드 실패");
-        return;
-      }
-      const email = document.getElementById("authEmail").value.trim();
-      const password = document.getElementById("authPassword").value.trim();
-
-      if (!email || !password) {
-        alert("이메일과 비밀번호를 모두 입력해 주세요.");
-        return;
-      }
-
-      if (authMode === "login") {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) {
-          alert("로그인 실패: " + error.message);
-        } else {
-          closeModal("authModal");
-        }
-      } else {
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
-        if (error) {
-          alert("회원가입 실패: " + error.message);
-        } else {
-          alert("회원가입 완료! 로그인 되었습니다.");
-          closeModal("authModal");
-        }
-      }
-    }
-
-    async function handleSignOut() {
-      if (!supabaseClient) return;
-      await supabaseClient.auth.signOut();
-      closeModal("authModal");
-      showToast("로그아웃되었습니다.");
-    }
-
-    async function fetchCloudData() {
-      if (!supabaseClient || !currentUser || isCloudSyncing) return;
-      isCloudSyncing = true;
-      try {
-        const { data, error } = await supabaseClient
-          .from("user_assets")
-          .select("*")
-          .eq("user_id", currentUser.id)
-          .maybeSingle();
-
-        if (error) {
-          console.error("클라우드 데이터 조회 오류:", error);
-          return;
-        }
-
-        if (data && data.snapshots && data.snapshots.length > 0) {
-          appState.snapshots = data.snapshots;
-          if (data.asset_classes && data.asset_classes.length > 0) appState.assetClasses = data.asset_classes;
-          sortSnapshots();
-          renderAll();
-      initSupabaseAuth();
-          showToast("☁️ 클라우드 데이터 최신화 완료");
-        } else {
-          // 신규 사용자의 경우 로컬 데이터를 클라우드에 최초 전송
-          await saveStateToCloud();
-        }
-      } catch (err) {
-        console.error("클라우드 동기화 예외:", err);
-      } finally {
-        isCloudSyncing = false;
-      }
-    }
-
-    async function saveStateToCloud() {
-      if (!supabaseClient || !currentUser || isCloudSyncing) return;
-      isCloudSyncing = true;
-      try {
-        const payload = {
-          user_id: currentUser.id,
-          snapshots: appState.snapshots,
-          asset_classes: appState.assetClasses,
-          updated_at: new Date().toISOString()
-        };
-
-        const { error } = await supabaseClient
-          .from("user_assets")
-          .upsert(payload, { onConflict: "user_id" });
-
-        if (error) {
-          console.error("클라우드 저장 실패:", error);
-        } else {
-          console.log("☁️ 클라우드 저장 완료");
-        }
-      } catch (err) {
-        console.error("클라우드 저장 예외:", err);
-      } finally {
-        isCloudSyncing = false;
-      }
-    }
+    
 
     function saveState() {
       try {
@@ -3292,6 +3142,7 @@
     (function init() {
       loadState();
       renderAll();
+      if (typeof initSupabaseCloud === 'function') initSupabaseCloud();
     })();
   </script>
 </body>
