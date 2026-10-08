@@ -51,6 +51,16 @@
           appState.snapshots = data.snapshots;
           if (data.asset_classes && data.asset_classes.length > 0) appState.assetClasses = data.asset_classes;
           sortSnapshots();
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+              snapshots: appState.snapshots,
+              currentSnapshotId: appState.currentSnapshotId,
+              currencyView: appState.currencyView,
+              assetClasses: appState.assetClasses,
+              categorySafety: appState.categorySafety,
+              theme: appState.theme
+            }));
+          } catch(e){}
           renderAll();
         } else {
           await saveStateToCloud();
