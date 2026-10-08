@@ -9,93 +9,9 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   
-
-<!-- Supabase JS Client -->
+  <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script>
-    // --------------------------------------------------------------------------
-    // Supabase 무소음 자동 클라우드 동기화 (로그인/버튼 없음)
-    // --------------------------------------------------------------------------
-    const SUPABASE_URL = "https://wgotvpcpcfvpcjmterep.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indnb3R2cGNwY2Z2cGNqbXRlcmVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0NjU3NTEsImV4cCI6MjEwNzA0MTc1MX0.E2HY8WqJIBRjfggn4B0Mo3LfYg3FjXhc43mxx-xdg9M";
 
-    let supabaseClient = null;
-    if (window.supabase) {
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
-
-    const SINGLE_USER_ID = "00000000-0000-0000-0000-000000000001";
-    let isCloudSyncing = false;
-
-    async function initSupabaseCloud() {
-      if (!supabaseClient) return;
-      await fetchCloudData();
-    }
-
-    async function fetchCloudData() {
-      if (!supabaseClient || isCloudSyncing) return;
-      isCloudSyncing = true;
-      try {
-        const { data, error } = await supabaseClient
-          .from("user_assets")
-          .select("*")
-          .eq("user_id", SINGLE_USER_ID)
-          .maybeSingle();
-
-        if (error) {
-          console.warn("클라우드 조회 중 (단일 사용자):", error.message);
-          return;
-        }
-
-        if (data && data.snapshots && data.snapshots.length > 0) {
-          appState.snapshots = data.snapshots;
-          if (data.asset_classes && data.asset_classes.length > 0) appState.assetClasses = data.asset_classes;
-          sortSnapshots();
-          try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({
-              snapshots: appState.snapshots,
-              currentSnapshotId: appState.currentSnapshotId,
-              currencyView: appState.currencyView,
-              assetClasses: appState.assetClasses,
-              categorySafety: appState.categorySafety,
-              theme: appState.theme
-            }));
-          } catch(e){}
-          renderAll();
-        } else {
-          await saveStateToCloud();
-        }
-      } catch (err) {
-        console.error("클라우드 동기화 예외:", err);
-      } finally {
-        isCloudSyncing = false;
-      }
-    }
-
-    async function saveStateToCloud() {
-      if (!supabaseClient || isCloudSyncing) return;
-      isCloudSyncing = true;
-      try {
-        const payload = {
-          user_id: SINGLE_USER_ID,
-          snapshots: appState.snapshots,
-          asset_classes: appState.assetClasses,
-          updated_at: new Date().toISOString()
-        };
-
-        const { error } = await supabaseClient
-          .from("user_assets")
-          .upsert(payload, { onConflict: "user_id" });
-
-        if (error) {
-          console.error("클라우드 저장 실패:", error);
-        }
-      } catch (err) {
-        console.error("클라우드 저장 예외:", err);
-      } finally {
-        isCloudSyncing = false;
-      }
-    }
   <!-- Chart.js & SheetJS (xlsx) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -1557,13 +1473,6 @@
     </div>
   </div>
 
-  
-      <div class="modal-foot">
-        <button class="ios-btn" onclick="closeModal('authModal')">닫기</button>
-      </div>
-    </div>
-  </div>
-
   <!-- 토스트 알림 컨테이너 -->
   <div class="toast-box" id="toastContainer"></div>
 
@@ -1685,9 +1594,6 @@
       }
     }
 
-
-    
-
     function saveState() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -1701,8 +1607,8 @@
       } catch (e) {
         console.error("로컬 스토리지 저장 실패", e);
       }
-      if (typeof saveStateToCloud === "function") {
-        saveStateToCloud();
+      if (typeof queueCloudSync === "function") {
+        queueCloudSync();
       }
     }
 
@@ -3152,10 +3058,105 @@
         .replace(/'/g, "&#039;");
     }
 
+    // --------------------------------------------------------------------------
+    // Supabase 클라우드 실시간 자동 동기화
+    // --------------------------------------------------------------------------
+    const SUPABASE_URL = "https://wgotvpcpcfvpcjmterep.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indnb3R2cGNwY2Z2cGNqbXRlcmVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE0NjU3NTEsImV4cCI6MjEwNzA0MTc1MX0.E2HY8WqJIBRjfggn4B0Mo3LfYg3FjXhc43mxx-xdg9M";
+    const SINGLE_USER_ID = "00000000-0000-0000-0000-000000000001";
+
+    let supabaseClient = null;
+    let isCloudSyncing = false;
+    let cloudSaveTimer = null;
+
+    function initSupabaseClient() {
+      if (window.supabase) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+    }
+
+    async function syncFromCloud() {
+      if (!supabaseClient || isCloudSyncing) return;
+      isCloudSyncing = true;
+      try {
+        const { data, error } = await supabaseClient
+          .from("user_assets")
+          .select("*")
+          .eq("user_id", SINGLE_USER_ID)
+          .maybeSingle();
+
+        if (error) {
+          console.warn("Supabase 조회 실패:", error.message);
+          return;
+        }
+
+        if (data && Array.isArray(data.snapshots) && data.snapshots.length > 0) {
+          appState.snapshots = data.snapshots;
+          if (Array.isArray(data.asset_classes) && data.asset_classes.length > 0) {
+            appState.assetClasses = data.asset_classes;
+          }
+          sortSnapshots();
+          if (!appState.snapshots.some(s => s.id === appState.currentSnapshotId)) {
+            appState.currentSnapshotId = appState.snapshots[appState.snapshots.length - 1].id;
+          }
+          // 로컬 스토리지도 함께 업데이트
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+              snapshots: appState.snapshots,
+              currentSnapshotId: appState.currentSnapshotId,
+              currencyView: appState.currencyView,
+              assetClasses: appState.assetClasses,
+              categorySafety: appState.categorySafety,
+              theme: appState.theme
+            }));
+          } catch(e){}
+          renderAll();
+        } else {
+          // DB에 데이터가 없으면 현재 로컬 데이터를 업로드
+          await syncToCloud();
+        }
+      } catch (err) {
+        console.error("클라우드 동기화 예외:", err);
+      } finally {
+        isCloudSyncing = false;
+      }
+    }
+
+    async function syncToCloud() {
+      if (!supabaseClient || isCloudSyncing) return;
+      isCloudSyncing = true;
+      try {
+        const payload = {
+          user_id: SINGLE_USER_ID,
+          snapshots: appState.snapshots,
+          asset_classes: appState.assetClasses,
+          updated_at: new Date().toISOString()
+        };
+        const { error } = await supabaseClient
+          .from("user_assets")
+          .upsert(payload, { onConflict: "user_id" });
+        if (error) {
+          console.error("Supabase 업로드 실패:", error);
+        }
+      } catch (err) {
+        console.error("Supabase 업로드 예외:", err);
+      } finally {
+        isCloudSyncing = false;
+      }
+    }
+
+    function queueCloudSync() {
+      if (cloudSaveTimer) clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = setTimeout(() => {
+        syncToCloud();
+      }, 500);
+    }
+
     (function init() {
       loadState();
       renderAll();
-      if (typeof initSupabaseCloud === 'function') initSupabaseCloud();
+      initSupabaseClient();
+      syncFromCloud();
     })();
   </script>
 </body>
