@@ -2978,29 +2978,37 @@
       wsSummary.getCell("B8").value = "구분";
       wsSummary.getCell("C8").value = "평가액 (KRW)";
       wsSummary.getCell("D8").value = "비중 (%)";
-      ["B8","C8","D8"].forEach(c => {
+      wsSummary.getCell("E8").value = "비중 차트";
+      ["B8","C8","D8","E8"].forEach(c => {
         const cell = wsSummary.getCell(c);
         cell.font = { name: "Pretendard", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_HEADER_BG } };
-        cell.alignment = { vertical: "middle", horizontal: c === "B8" ? "left" : "right" };
+        cell.alignment = { vertical: "middle", horizontal: (c === "B8" || c === "E8") ? "left" : "right" };
       });
       wsSummary.getRow(8).height = 24;
 
+      const safeRatio = totalKRW > 0 ? safeKRW / totalKRW : 0;
+      const riskRatio = totalKRW > 0 ? riskKRW / totalKRW : 0;
+
       const safeRow = wsSummary.getRow(9);
-      safeRow.getCell(2).value = "🛡️ 안전자산";
+      safeRow.getCell(2).value = "안전자산";
       safeRow.getCell(2).font = { name: "Pretendard", size: 10, bold: true, color: { argb: COLOR_SAFE } };
       safeRow.getCell(3).value = safeKRW;
       safeRow.getCell(3).numFmt = "₩#,##0";
-      safeRow.getCell(4).value = totalKRW > 0 ? safeKRW / totalKRW : 0;
+      safeRow.getCell(4).value = safeRatio;
       safeRow.getCell(4).numFmt = "0.0%";
+      safeRow.getCell(5).value = "■".repeat(Math.round(safeRatio * 20));
+      safeRow.getCell(5).font = { name: "Arial", size: 9, bold: true, color: { argb: COLOR_SAFE } };
 
       const riskRow = wsSummary.getRow(10);
-      riskRow.getCell(2).value = "⚡ 위험자산";
+      riskRow.getCell(2).value = "위험자산";
       riskRow.getCell(2).font = { name: "Pretendard", size: 10, bold: true, color: { argb: COLOR_RISK } };
       riskRow.getCell(3).value = riskKRW;
       riskRow.getCell(3).numFmt = "₩#,##0";
-      riskRow.getCell(4).value = totalKRW > 0 ? riskKRW / totalKRW : 0;
+      riskRow.getCell(4).value = riskRatio;
       riskRow.getCell(4).numFmt = "0.0%";
+      riskRow.getCell(5).value = "■".repeat(Math.round(riskRatio * 20));
+      riskRow.getCell(5).font = { name: "Arial", size: 9, bold: true, color: { argb: COLOR_RISK } };
 
       const sumRow = wsSummary.getRow(11);
       sumRow.getCell(2).value = "합계";
@@ -3011,65 +3019,103 @@
       sumRow.getCell(4).value = 1.0;
       sumRow.getCell(4).numFmt = "0.0%";
       sumRow.getCell(4).font = { bold: true };
+      sumRow.getCell(5).value = "";
 
       [safeRow, riskRow, sumRow].forEach(r => {
         r.height = 22;
-        [2,3,4].forEach(col => {
+        [2,3,4,5].forEach(col => {
           const c = r.getCell(col);
           c.border = { bottom: { style: "thin", color: { argb: COLOR_BORDER } }, top: { style: "thin", color: { argb: COLOR_BORDER } } };
-          if (col >= 3) c.alignment = { vertical: "middle", horizontal: "right" };
+          if (col >= 3 && col <= 4) c.alignment = { vertical: "middle", horizontal: "right" };
+          else if (col === 5) c.alignment = { vertical: "middle", horizontal: "left" };
         });
       });
 
-      // 자산군별 비중 테이블
+      // 자산군별 비중 테이블 & 엑셀 인셀 바 차트
       wsSummary.getCell("B13").value = "자산군별 비중";
       wsSummary.getCell("C13").value = "평가액 (KRW)";
       wsSummary.getCell("D13").value = "비중 (%)";
-      ["B13","C13","D13"].forEach(c => {
+      wsSummary.getCell("E13").value = "비중 차트";
+      ["B13","C13","D13","E13"].forEach(c => {
         const cell = wsSummary.getCell(c);
         cell.font = { name: "Pretendard", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_PRIMARY } };
-        cell.alignment = { vertical: "middle", horizontal: c === "B13" ? "left" : "right" };
+        cell.alignment = { vertical: "middle", horizontal: (c === "B13" || c === "E13") ? "left" : "right" };
       });
       wsSummary.getRow(13).height = 24;
 
       let classRowIdx = 14;
       appState.assetClasses.forEach((cat, idx) => {
         const val = classMap[cat] || 0;
+        const ratio = totalKRW > 0 ? val / totalKRW : 0;
         const r = wsSummary.getRow(classRowIdx);
-        r.height = 21;
+        r.height = 22;
         r.getCell(2).value = cat;
-        r.getCell(2).font = { name: "Pretendard", size: 9.5 };
+        r.getCell(2).font = { name: "Pretendard", size: 9.5, bold: true };
         r.getCell(3).value = val;
         r.getCell(3).numFmt = "₩#,##0";
-        r.getCell(4).value = totalKRW > 0 ? val / totalKRW : 0;
+        r.getCell(4).value = ratio;
         r.getCell(4).numFmt = "0.0%";
-        [2,3,4].forEach(col => {
+
+        // 엑셀 수치 기반 인셀 막대 차트 (비중에 비례한 게이지 바)
+        const barLength = Math.max(0, Math.min(25, Math.round(ratio * 25)));
+        const barChar = "█";
+        r.getCell(5).value = barLength > 0 ? barChar.repeat(barLength) : "";
+        r.getCell(5).font = { name: "Arial", size: 10, color: { argb: COLOR_ACCENT } };
+        r.getCell(5).alignment = { vertical: "middle", horizontal: "left" };
+
+        [2,3,4,5].forEach(col => {
           const c = r.getCell(col);
           c.border = { bottom: { style: "thin", color: { argb: COLOR_BORDER } } };
-          if (col >= 3) c.alignment = { vertical: "middle", horizontal: "right" };
+          if (col >= 3 && col <= 4) c.alignment = { vertical: "middle", horizontal: "right" };
           if (idx % 2 === 1) c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
         });
         classRowIdx++;
       });
 
-      // 웹 대시보드의 도넛 차트 이미지 캡처 후 엑셀에 임베딩!
+      // 엑셀 조건부 서식 데이터 막대(Data Bar) 추가 (C14:C{classRowIdx-1})
       try {
-        const chartCanvas = document.getElementById("classDoughnutChart");
-        if (chartCanvas) {
-          const imgBase64 = chartCanvas.toDataURL("image/png");
-          const imageId = workbook.addImage({
-            base64: imgBase64,
-            extension: "png"
-          });
-          wsSummary.addImage(imageId, {
-            tl: { col: 5, row: 3 },
-            ext: { width: 340, height: 260 }
-          });
-        }
+        wsSummary.addConditionalFormatting({
+          ref: `C14:C${classRowIdx - 1}`,
+          rules: [
+            {
+              type: "dataBar",
+              priority: 1,
+              color: { argb: "FF3B82F6" },
+              cfvo: [
+                { type: "num", value: 0 },
+                { type: "max" }
+              ]
+            }
+          ]
+        });
       } catch (e) {
-        console.warn("엑셀 차트 이미지 삽입 실패:", e);
+        console.warn("데이터 막대 서식 추가 실패:", e);
       }
+
+      // 우측 자산군 비중 요약 비주얼 패널 (B열~E열과 대비되는 포트폴리오 요약 가이드)
+      wsSummary.mergeCells("G5:H5");
+      wsSummary.getCell("G5").value = "📈 포트폴리오 구성 비중 가이드";
+      wsSummary.getCell("G5").font = { name: "Pretendard", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
+      wsSummary.getCell("G5").fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_PRIMARY } };
+      wsSummary.getCell("G5").alignment = { vertical: "middle", horizontal: "center" };
+
+      let guideRow = 6;
+      appState.assetClasses.forEach((cat, idx) => {
+        const val = classMap[cat] || 0;
+        const ratio = totalKRW > 0 ? val / totalKRW : 0;
+        const pctStr = (ratio * 100).toFixed(1) + "%";
+        wsSummary.getCell(`G${guideRow}`).value = cat;
+        wsSummary.getCell(`G${guideRow}`).font = { name: "Pretendard", size: 9.5, bold: true };
+        wsSummary.getCell(`H${guideRow}`).value = `${pctStr} (₩${Math.round(val).toLocaleString('ko-KR')})`;
+        wsSummary.getCell(`H${guideRow}`).font = { name: "Pretendard", size: 9 };
+        wsSummary.getCell(`H${guideRow}`).alignment = { horizontal: "right" };
+        [wsSummary.getCell(`G${guideRow}`), wsSummary.getCell(`H${guideRow}`)].forEach(c => {
+          c.border = { bottom: { style: "thin", color: { argb: COLOR_BORDER } } };
+          if (idx % 2 === 1) c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+        });
+        guideRow++;
+      });
 
       // ==========================================
       // SHEET 2: things (상세 종목 시트 - 오빠두엑셀 스타일)
@@ -3120,13 +3166,13 @@
         };
       }
 
-      // 데이터 행 추가
+      // 데이터 행 추가 (방패, 번개 아이콘 제거! 오직 '안전' / '위험'으로만 표시)
       cur.items.forEach((it, idx) => {
         const ev = getItemEvalAmounts(it, fx);
         const pct = totalKRW > 0 ? (ev.krw / totalKRW) : 0;
         const row = wsThings.addRow({
           date: cur.date,
-          safe: it.isSafe ? "🛡️ 안전" : "⚡ 위험",
+          safe: it.isSafe ? "안전" : "위험",
           category: it.category,
           name: it.name,
           unitPrice: it.unitPrice != null ? it.unitPrice : "",
@@ -3154,7 +3200,7 @@
         row.getCell(10).numFmt = "$#,##0.00";
         row.getCell(11).numFmt = "0.0%";
 
-        // 안전/위험 강조 텍스트 색상
+        // 안전/위험 텍스트 색상 구분 (아이콘 없이 깔끔한 폰트 컬러로 강조)
         if (it.isSafe) {
           row.getCell(2).font = { name: "Pretendard", size: 9.5, bold: true, color: { argb: COLOR_SAFE } };
         } else {
@@ -3181,6 +3227,29 @@
           }
         }
       });
+
+      // things 시트 원화 환산액(I열)에 데이터 막대 조건부 서식 추가
+      try {
+        const thingsRowCount = wsThings.rowCount;
+        if (thingsRowCount >= 3) {
+          wsThings.addConditionalFormatting({
+            ref: `I3:I${thingsRowCount}`,
+            rules: [
+              {
+                type: "dataBar",
+                priority: 1,
+                color: { argb: "FF60A5FA" },
+                cfvo: [
+                  { type: "num", value: 0 },
+                  { type: "max" }
+                ]
+              }
+            ]
+          });
+        }
+      } catch (e) {
+        console.warn("things 데이터 막대 서식 추가 실패:", e);
+      }
 
       // 합계 행 (Total Row)
       const lastRowIdx = wsThings.rowCount + 1;
@@ -3221,17 +3290,27 @@
         { header: "총자산 (KRW)", key: "total", width: 22 },
         { header: "안전자산 (KRW)", key: "safe", width: 20 },
         { header: "위험자산 (KRW)", key: "risk", width: 20 },
-        { header: "종목수", key: "count", width: 10 }
+        { header: "종목수", key: "count", width: 10 },
+        { header: "성장 추이 차트", key: "trend", width: 25 }
       ];
 
       const histHeader = wsHistory.getRow(1);
       histHeader.height = 25;
       histHeader.font = { name: "Pretendard", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
-      for (let col = 1; col <= 6; col++) {
+      for (let col = 1; col <= 7; col++) {
         const cell = histHeader.getCell(col);
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_HEADER_BG } };
-        cell.alignment = { vertical: "middle", horizontal: col > 1 ? "right" : "center" };
+        cell.alignment = { vertical: "middle", horizontal: (col > 1 && col < 7) ? "right" : "center" };
       }
+
+      let maxHistoryTotal = 1;
+      appState.snapshots.forEach(s => {
+        let t = 0;
+        s.items.forEach(i => {
+          t += getItemEvalAmounts(i, s.exchangeRate || 1350).krw;
+        });
+        if (t > maxHistoryTotal) maxHistoryTotal = t;
+      });
 
       appState.snapshots.forEach((s, idx) => {
         let t = 0, sa = 0, ri = 0;
@@ -3247,7 +3326,8 @@
           total: t,
           safe: sa,
           risk: ri,
-          count: s.items.length
+          count: s.items.length,
+          trend: "█".repeat(Math.max(1, Math.min(22, Math.round((t / maxHistoryTotal) * 22))))
         });
         r.height = 21;
         r.font = { name: "Pretendard", size: 9.5 };
@@ -3257,33 +3337,40 @@
         r.getCell(4).numFmt = "₩#,##0";
         r.getCell(5).numFmt = "₩#,##0";
         r.getCell(6).alignment = { vertical: "middle", horizontal: "right" };
+        r.getCell(7).font = { name: "Arial", size: 10, color: { argb: COLOR_HEADER_BG } };
+        r.getCell(7).alignment = { vertical: "middle", horizontal: "left" };
 
         if (idx % 2 === 1) {
-          for (let col = 1; col <= 6; col++) {
+          for (let col = 1; col <= 7; col++) {
             r.getCell(col).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
           }
         }
-        for (let col = 1; col <= 6; col++) {
+        for (let col = 1; col <= 7; col++) {
           r.getCell(col).border = { bottom: { style: "thin", color: { argb: "FFE2E8F0" } } };
         }
       });
 
-      // 히스토리 추이 라인 차트 임베딩
+      // 히스토리 총자산(C열)에 엑셀 데이터 막대 서식 추가
       try {
-        const lineCanvas = document.getElementById("historyLineChart");
-        if (lineCanvas) {
-          const imgBase64 = lineCanvas.toDataURL("image/png");
-          const imageId = workbook.addImage({
-            base64: imgBase64,
-            extension: "png"
-          });
-          wsHistory.addImage(imageId, {
-            tl: { col: 7, row: 1 },
-            ext: { width: 480, height: 260 }
+        const histRowCount = wsHistory.rowCount;
+        if (histRowCount >= 2) {
+          wsHistory.addConditionalFormatting({
+            ref: `C2:C${histRowCount}`,
+            rules: [
+              {
+                type: "dataBar",
+                priority: 1,
+                color: { argb: "FF3B82F6" },
+                cfvo: [
+                  { type: "min" },
+                  { type: "max" }
+                ]
+              }
+            ]
           });
         }
       } catch (e) {
-        console.warn("히스토리 차트 이미지 삽입 실패:", e);
+        console.warn("히스토리 데이터 막대 서식 추가 실패:", e);
       }
 
       // 엑셀 파일 다운로드 트리거
