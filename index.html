@@ -12,9 +12,10 @@
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
-  <!-- Chart.js & SheetJS (xlsx) -->
+  <!-- Chart.js & SheetJS & ExcelJS -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 
   <style>
     /* ==========================================================================
@@ -776,6 +777,48 @@
       text-align: right;
       font-weight: 700;
       width: 140px;
+    }
+    .amount-cell-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+    }
+    .calc-mode-toggle {
+      border: none;
+      background: rgba(127, 140, 170, 0.12);
+      color: var(--ink-2);
+      font-size: 0.68rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .calc-mode-toggle:hover {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .calc-sub-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      color: var(--ink-3);
+    }
+    .calc-sub-input {
+      width: 68px;
+      text-align: right;
+      padding: 2px 4px;
+      font-size: 0.75rem;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: var(--panel-solid);
+      color: var(--ink);
+      outline: none;
+    }
+    .calc-sub-input:focus {
+      border-color: var(--accent);
     }
 
     /* 통화 뱃지 (국기 이모지 포함) */
@@ -2437,11 +2480,30 @@
                 <span>${curr}</span>
               </span>
             </td>
-            <!-- 4번째 요청: 쉼표 포맷팅 및 마우스 스피너 없는 텍스트 입력창 -->
+            <!-- 4번째 요청: 금액 직접입력 또는 주가 x 수량 계산 모드 지원 -->
             <td style="text-align: right;">
-              <input type="text" class="inline-input amount" value="${formattedAmount}" 
-                     oninput="formatTableRowAmount(this)"
-                     onchange="updateItemAmountFromFormatted('${item.id}', this.value)">
+              <div class="amount-cell-wrap">
+                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 4px; width: 100%;">
+                  <button type="button" class="calc-mode-toggle" onclick="toggleItemCalcMode('${item.id}')" title="계산 방식 전환: 직접입력 ↔ 주가×수량">
+                    ${item.calcMode === 'qty_price' ? '주가×수량' : '직접입력'}
+                  </button>
+                  <input type="text" class="inline-input amount" value="${formattedAmount}" 
+                         ${item.calcMode === 'qty_price' ? 'readonly style="background: rgba(127,140,170,0.08); cursor: not-allowed;"' : ''}
+                         oninput="formatTableRowAmount(this)"
+                         onchange="updateItemAmountFromFormatted('${item.id}', this.value)">
+                </div>
+                ${item.calcMode === 'qty_price' ? `
+                  <div class="calc-sub-row">
+                    <span>주가:</span>
+                    <input type="text" class="calc-sub-input" value="${item.unitPrice != null ? Number(item.unitPrice).toLocaleString('ko-KR') : ''}" placeholder="단가"
+                           oninput="formatTableRowAmount(this)"
+                           onchange="updateItemUnitPrice('${item.id}', this.value)">
+                    <span>× 수량:</span>
+                    <input type="text" class="calc-sub-input" style="width: 50px;" value="${item.quantity != null ? item.quantity : ''}" placeholder="수량"
+                           onchange="updateItemQuantity('${item.id}', this.value)">
+                  </div>
+                ` : ''}
+              </div>
             </td>
             <td style="text-align: right; font-weight: 700;">
               ${formatMoney(displayAmt)}
@@ -2488,6 +2550,51 @@
     function formatTableRowAmount(input) {
       const num = Number(input.value.replace(/[^0-9]/g, '')) || 0;
       input.value = num > 0 ? num.toLocaleString('ko-KR') : '';
+    }
+
+    function toggleItemCalcMode(itemId) {
+      const cur = getCurrentSnapshot();
+      const it = cur.items.find(x => x.id === itemId);
+      if (!it) return;
+      if (it.calcMode === 'qty_price') {
+        it.calcMode = 'direct';
+      } else {
+        it.calcMode = 'qty_price';
+        if (!it.unitPrice && it.amount) {
+          it.unitPrice = it.amount;
+          it.quantity = 1;
+        }
+      }
+      saveState();
+      renderTable();
+    }
+
+    function updateItemUnitPrice(itemId, val) {
+      const cur = getCurrentSnapshot();
+      const it = cur.items.find(x => x.id === itemId);
+      if (!it) return;
+      const price = Number(String(val).replace(/[^0-9]/g, '')) || 0;
+      it.unitPrice = price;
+      it.amount = Math.round(price * (Number(it.quantity) || 0));
+      saveState();
+      renderKPIs();
+      renderCharts();
+      renderRebalanceAndCompare();
+      renderTable();
+    }
+
+    function updateItemQuantity(itemId, val) {
+      const cur = getCurrentSnapshot();
+      const it = cur.items.find(x => x.id === itemId);
+      if (!it) return;
+      const qty = parseFloat(val) || 0;
+      it.quantity = qty;
+      it.amount = Math.round((Number(it.unitPrice) || 0) * qty);
+      saveState();
+      renderKPIs();
+      renderCharts();
+      renderRebalanceAndCompare();
+      renderTable();
     }
 
     function updateItemAmountFromFormatted(itemId, formattedVal) {
@@ -2763,7 +2870,7 @@
     // --------------------------------------------------------------------------
     // 11. 엑셀 연동 (8번째 요청: 샘플 템플릿 금액 10만원 통일)
     // --------------------------------------------------------------------------
-    function exportToExcel() {
+    async function exportToExcel() {
       const cur = getCurrentSnapshot();
       const fx = cur.exchangeRate || 1350;
 
@@ -2778,76 +2885,421 @@
         classMap[it.category] = (classMap[it.category] || 0) + ev.krw;
       });
 
-      const summaryData = [
-        ["자산 리밸런싱 리포트"],
-        ["기록 일자", cur.date],
-        ["기준 환율 (USD/KRW)", fx],
-        ["총 평가 금액 (KRW)", totalKRW],
-        ["총 평가 금액 (USD)", fx > 0 ? totalKRW / fx : 0],
-        [],
-        ["구분", "평가액 (KRW)", "비중 (%)"],
-        ["안전자산", safeKRW, totalKRW > 0 ? (safeKRW / totalKRW * 100).toFixed(1) + "%" : "0%"],
-        ["위험자산", riskKRW, totalKRW > 0 ? (riskKRW / totalKRW * 100).toFixed(1) + "%" : "0%"],
-        ["자산총합", totalKRW, "100.0%"],
-        [],
-        ["자산군별 비중", "평가액 (KRW)", "비중 (%)"]
-      ];
+      // ExcelJS 미지원 환경 대비 fallback
+      if (typeof ExcelJS === "undefined") {
+        alert("ExcelJS 라이브러리를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+        return;
+      }
 
-      appState.assetClasses.forEach(c => {
-        const val = classMap[c] || 0;
-        const pct = totalKRW > 0 ? ((val / totalKRW) * 100).toFixed(1) + "%" : "0%";
-        summaryData.push([c, val, pct]);
+      showToast("🎨 대시보드 및 차트가 포함된 고급 엑셀 파일을 생성 중입니다...");
+
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = "Antigravity Asset Manager";
+      workbook.created = new Date();
+
+      // 테마 색상 팔레트
+      const COLOR_PRIMARY = "1E3A8A";   // Deep Indigo Blue
+      const COLOR_ACCENT = "3B5BDB";    // Apple/Indigo Accent
+      const COLOR_HEADER_BG = "2563EB"; // Blue 600
+      const COLOR_BG_LIGHT = "F1F5F9";  // Slate 100
+      const COLOR_BORDER = "CBD5E1";    // Slate 300
+      const COLOR_SAFE = "15803D";      // Green 700
+      const COLOR_RISK = "C2410C";      // Orange 700
+
+      // ==========================================
+      // SHEET 1: 자산요약 (대시보드)
+      // ==========================================
+      const wsSummary = workbook.addWorksheet("자산요약", {
+        views: [{ showGridLines: true }]
       });
 
-      // 1번째 요청: 비고 및 메모 열 분리
-      const thingsHeader = ["일자", "안전/위험", "자산 구분", "종목", "금액", "입력통화", "원화 환산액", "달러 환산액", "비중(%)", "위치 계좌", "환노출 여부", "비고", "상세메모"];
-      const thingsData = [thingsHeader];
+      // 열 너비 설정
+      wsSummary.columns = [
+        { width: 5 },   // A (마진)
+        { width: 22 },  // B (항목/라벨)
+        { width: 20 },  // C (금액 KRW)
+        { width: 14 },  // D (비중/달러)
+        { width: 6 },   // E (구분)
+        { width: 18 },  // F (차트/우측 라벨)
+        { width: 18 },  // G
+        { width: 18 }   // H
+      ];
 
-      cur.items.forEach(it => {
+      // 대시보드 타이틀
+      wsSummary.mergeCells("B2:D2");
+      const titleCell = wsSummary.getCell("B2");
+      titleCell.value = "📊 자산 관리 & 포트폴리오 리밸런싱 대시보드";
+      titleCell.font = { name: "Pretendard", size: 15, bold: true, color: { argb: "FFFFFFFF" } };
+      titleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_PRIMARY } };
+      titleCell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
+      wsSummary.getRow(2).height = 36;
+
+      // 기준 정보 (날짜, 환율)
+      wsSummary.getCell("B3").value = "기준 일자";
+      wsSummary.getCell("C3").value = cur.date;
+      wsSummary.getCell("D3").value = "기준 환율 (USD/KRW)";
+      wsSummary.getCell("D3").alignment = { horizontal: "right" };
+      wsSummary.getCell("E3").value = fx;
+      wsSummary.getCell("E3").numFmt = "₩#,##0";
+      wsSummary.getRow(3).font = { name: "Pretendard", size: 9.5, color: { argb: "FF475569" } };
+      wsSummary.getRow(3).height = 22;
+
+      // 총자산 카드 영역
+      wsSummary.mergeCells("B5:C5");
+      wsSummary.getCell("B5").value = "총 평가 금액 (KRW)";
+      wsSummary.getCell("B5").font = { name: "Pretendard", size: 10, bold: true, color: { argb: "FF64748B" } };
+
+      wsSummary.mergeCells("B6:C6");
+      const totalCell = wsSummary.getCell("B6");
+      totalCell.value = totalKRW;
+      totalCell.numFmt = "₩#,##0";
+      totalCell.font = { name: "Pretendard", size: 18, bold: true, color: { argb: COLOR_PRIMARY } };
+      wsSummary.getRow(6).height = 32;
+
+      wsSummary.getCell("D5").value = "총 평가 (USD)";
+      wsSummary.getCell("D5").font = { name: "Pretendard", size: 9, color: { argb: "FF64748B" } };
+      const totalUsdCell = wsSummary.getCell("D6");
+      totalUsdCell.value = fx > 0 ? totalKRW / fx : 0;
+      totalUsdCell.numFmt = "$#,##0.00";
+      totalUsdCell.font = { name: "Pretendard", size: 13, bold: true, color: { argb: "FF1E293B" } };
+
+      // 박스 테두리
+      ["B5","C5","D5","B6","C6","D6"].forEach(pos => {
+        wsSummary.getCell(pos).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+        wsSummary.getCell(pos).border = {
+          top: { style: "thin", color: { argb: COLOR_BORDER } },
+          bottom: { style: "thin", color: { argb: COLOR_BORDER } },
+          left: { style: "thin", color: { argb: COLOR_BORDER } },
+          right: { style: "thin", color: { argb: COLOR_BORDER } }
+        };
+      });
+
+      // 안전자산 / 위험자산 구분 테이블
+      wsSummary.getCell("B8").value = "구분";
+      wsSummary.getCell("C8").value = "평가액 (KRW)";
+      wsSummary.getCell("D8").value = "비중 (%)";
+      ["B8","C8","D8"].forEach(c => {
+        const cell = wsSummary.getCell(c);
+        cell.font = { name: "Pretendard", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_HEADER_BG } };
+        cell.alignment = { vertical: "middle", horizontal: c === "B8" ? "left" : "right" };
+      });
+      wsSummary.getRow(8).height = 24;
+
+      const safeRow = wsSummary.getRow(9);
+      safeRow.getCell(2).value = "🛡️ 안전자산";
+      safeRow.getCell(2).font = { name: "Pretendard", size: 10, bold: true, color: { argb: COLOR_SAFE } };
+      safeRow.getCell(3).value = safeKRW;
+      safeRow.getCell(3).numFmt = "₩#,##0";
+      safeRow.getCell(4).value = totalKRW > 0 ? safeKRW / totalKRW : 0;
+      safeRow.getCell(4).numFmt = "0.0%";
+
+      const riskRow = wsSummary.getRow(10);
+      riskRow.getCell(2).value = "⚡ 위험자산";
+      riskRow.getCell(2).font = { name: "Pretendard", size: 10, bold: true, color: { argb: COLOR_RISK } };
+      riskRow.getCell(3).value = riskKRW;
+      riskRow.getCell(3).numFmt = "₩#,##0";
+      riskRow.getCell(4).value = totalKRW > 0 ? riskKRW / totalKRW : 0;
+      riskRow.getCell(4).numFmt = "0.0%";
+
+      const sumRow = wsSummary.getRow(11);
+      sumRow.getCell(2).value = "합계";
+      sumRow.getCell(2).font = { name: "Pretendard", size: 10, bold: true };
+      sumRow.getCell(3).value = totalKRW;
+      sumRow.getCell(3).numFmt = "₩#,##0";
+      sumRow.getCell(3).font = { bold: true };
+      sumRow.getCell(4).value = 1.0;
+      sumRow.getCell(4).numFmt = "0.0%";
+      sumRow.getCell(4).font = { bold: true };
+
+      [safeRow, riskRow, sumRow].forEach(r => {
+        r.height = 22;
+        [2,3,4].forEach(col => {
+          const c = r.getCell(col);
+          c.border = { bottom: { style: "thin", color: { argb: COLOR_BORDER } }, top: { style: "thin", color: { argb: COLOR_BORDER } } };
+          if (col >= 3) c.alignment = { vertical: "middle", horizontal: "right" };
+        });
+      });
+
+      // 자산군별 비중 테이블
+      wsSummary.getCell("B13").value = "자산군별 비중";
+      wsSummary.getCell("C13").value = "평가액 (KRW)";
+      wsSummary.getCell("D13").value = "비중 (%)";
+      ["B13","C13","D13"].forEach(c => {
+        const cell = wsSummary.getCell(c);
+        cell.font = { name: "Pretendard", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_PRIMARY } };
+        cell.alignment = { vertical: "middle", horizontal: c === "B13" ? "left" : "right" };
+      });
+      wsSummary.getRow(13).height = 24;
+
+      let classRowIdx = 14;
+      appState.assetClasses.forEach((cat, idx) => {
+        const val = classMap[cat] || 0;
+        const r = wsSummary.getRow(classRowIdx);
+        r.height = 21;
+        r.getCell(2).value = cat;
+        r.getCell(2).font = { name: "Pretendard", size: 9.5 };
+        r.getCell(3).value = val;
+        r.getCell(3).numFmt = "₩#,##0";
+        r.getCell(4).value = totalKRW > 0 ? val / totalKRW : 0;
+        r.getCell(4).numFmt = "0.0%";
+        [2,3,4].forEach(col => {
+          const c = r.getCell(col);
+          c.border = { bottom: { style: "thin", color: { argb: COLOR_BORDER } } };
+          if (col >= 3) c.alignment = { vertical: "middle", horizontal: "right" };
+          if (idx % 2 === 1) c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+        });
+        classRowIdx++;
+      });
+
+      // 웹 대시보드의 도넛 차트 이미지 캡처 후 엑셀에 임베딩!
+      try {
+        const chartCanvas = document.getElementById("classDoughnutChart");
+        if (chartCanvas) {
+          const imgBase64 = chartCanvas.toDataURL("image/png");
+          const imageId = workbook.addImage({
+            base64: imgBase64,
+            extension: "png"
+          });
+          wsSummary.addImage(imageId, {
+            tl: { col: 5, row: 3 },
+            ext: { width: 340, height: 260 }
+          });
+        }
+      } catch (e) {
+        console.warn("엑셀 차트 이미지 삽입 실패:", e);
+      }
+
+      // ==========================================
+      // SHEET 2: things (상세 종목 시트 - 오빠두엑셀 스타일)
+      // ==========================================
+      const wsThings = workbook.addWorksheet("things", {
+        views: [{ showGridLines: true, state: "frozen", ySplit: 2 }]
+      });
+
+      // 컬럼 정의 (너비 넉넉히 설정하여 억단위 지수표기 1.5E+08 방지!)
+      wsThings.columns = [
+        { header: "일자", key: "date", width: 14 },
+        { header: "안전/위험", key: "safe", width: 12 },
+        { header: "자산 구분", key: "category", width: 14 },
+        { header: "종목", key: "name", width: 22 },
+        { header: "단가 (주가)", key: "unitPrice", width: 16 },
+        { header: "수량", key: "quantity", width: 10 },
+        { header: "입력 금액", key: "amount", width: 18 },
+        { header: "입력통화", key: "currency", width: 11 },
+        { header: "원화 환산액 (KRW)", key: "evalKrw", width: 20 },
+        { header: "달러 환산액 (USD)", key: "evalUsd", width: 18 },
+        { header: "비중(%)", key: "pct", width: 11 },
+        { header: "위치 계좌", key: "account", width: 16 },
+        { header: "환노출 여부", key: "fxExposed", width: 12 },
+        { header: "비고", key: "memo", width: 18 },
+        { header: "상세메모", key: "note", width: 24 }
+      ];
+
+      // 1행: 시트 타이틀
+      wsThings.insertRow(1, ["📋 종목별 상세 현황 (Things Sheet)"]);
+      wsThings.mergeCells("A1:O1");
+      const thingsTitleCell = wsThings.getCell("A1");
+      thingsTitleCell.font = { name: "Pretendard", size: 13, bold: true, color: { argb: "FFFFFFFF" } };
+      thingsTitleCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_PRIMARY } };
+      thingsTitleCell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
+      wsThings.getRow(1).height = 32;
+
+      // 2행: 헤더 스타일 (오빠두엑셀 스타일 색상 및 패딩)
+      const thingsHeaderRow = wsThings.getRow(2);
+      thingsHeaderRow.height = 26;
+      thingsHeaderRow.font = { name: "Pretendard", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
+      for (let col = 1; col <= 15; col++) {
+        const cell = thingsHeaderRow.getCell(col);
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_HEADER_BG } };
+        cell.alignment = { vertical: "middle", horizontal: (col >= 5 && col <= 11) ? "right" : "center" };
+        cell.border = {
+          top: { style: "medium", color: { argb: COLOR_PRIMARY } },
+          bottom: { style: "medium", color: { argb: COLOR_PRIMARY } }
+        };
+      }
+
+      // 데이터 행 추가
+      cur.items.forEach((it, idx) => {
         const ev = getItemEvalAmounts(it, fx);
-        const pct = totalKRW > 0 ? ((ev.krw / totalKRW) * 100).toFixed(1) + "%" : "0%";
-        thingsData.push([
-          cur.date,
-          it.isSafe ? "안전" : "위험",
-          it.category,
-          it.name,
-          it.amount,
-          it.currency || "KRW",
-          ev.krw,
-          ev.usd,
-          pct,
-          it.account || "",
-          it.fxExposed ? "Y" : "N",
-          it.memo || "",
-          it.note || ""
-        ]);
+        const pct = totalKRW > 0 ? (ev.krw / totalKRW) : 0;
+        const row = wsThings.addRow({
+          date: cur.date,
+          safe: it.isSafe ? "🛡️ 안전" : "⚡ 위험",
+          category: it.category,
+          name: it.name,
+          unitPrice: it.unitPrice != null ? it.unitPrice : "",
+          quantity: it.quantity != null ? it.quantity : "",
+          amount: it.amount,
+          currency: it.currency || "KRW",
+          evalKrw: ev.krw,
+          evalUsd: ev.usd,
+          pct: pct,
+          account: it.account || "",
+          fxExposed: it.fxExposed ? "Y" : "N",
+          memo: it.memo || "",
+          note: it.note || ""
+        });
+
+        row.height = 22;
+        row.font = { name: "Pretendard", size: 9.5 };
+
+        // 통화에 따른 입력금액 표시형식 ($ 또는 ₩, 천단위 쉼표)
+        const isUsd = (it.currency === "USD");
+        row.getCell(5).numFmt = isUsd ? "$#,##0.00" : "₩#,##0";
+        row.getCell(6).numFmt = "#,##0.##";
+        row.getCell(7).numFmt = isUsd ? "$#,##0.00" : "₩#,##0";
+        row.getCell(9).numFmt = "₩#,##0";
+        row.getCell(10).numFmt = "$#,##0.00";
+        row.getCell(11).numFmt = "0.0%";
+
+        // 안전/위험 강조 텍스트 색상
+        if (it.isSafe) {
+          row.getCell(2).font = { name: "Pretendard", size: 9.5, bold: true, color: { argb: COLOR_SAFE } };
+        } else {
+          row.getCell(2).font = { name: "Pretendard", size: 9.5, bold: true, color: { argb: COLOR_RISK } };
+        }
+
+        // 지브라 배경 패턴 (줄무늬 색상)
+        if (idx % 2 === 1) {
+          for (let col = 1; col <= 15; col++) {
+            row.getCell(col).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+          }
+        }
+
+        // 테두리 및 정렬
+        for (let col = 1; col <= 15; col++) {
+          const cell = row.getCell(col);
+          cell.border = { bottom: { style: "thin", color: { argb: "FFE2E8F0" } } };
+          if (col >= 5 && col <= 11) {
+            cell.alignment = { vertical: "middle", horizontal: "right" };
+          } else if ([1, 2, 8, 13].includes(col)) {
+            cell.alignment = { vertical: "middle", horizontal: "center" };
+          } else {
+            cell.alignment = { vertical: "middle", horizontal: "left" };
+          }
+        }
       });
 
-      const historyData = [
-        ["일자", "기준환율", "총자산(KRW)", "안전자산(KRW)", "위험자산(KRW)", "종목수"]
+      // 합계 행 (Total Row)
+      const lastRowIdx = wsThings.rowCount + 1;
+      const totalRow = wsThings.getRow(lastRowIdx);
+      totalRow.height = 25;
+      totalRow.getCell(4).value = "합계 (Total)";
+      totalRow.getCell(4).font = { name: "Pretendard", size: 10, bold: true };
+      totalRow.getCell(4).alignment = { vertical: "middle", horizontal: "center" };
+      totalRow.getCell(9).value = totalKRW;
+      totalRow.getCell(9).numFmt = "₩#,##0";
+      totalRow.getCell(9).font = { name: "Pretendard", size: 10, bold: true, color: { argb: COLOR_PRIMARY } };
+      totalRow.getCell(10).value = fx > 0 ? totalKRW / fx : 0;
+      totalRow.getCell(10).numFmt = "$#,##0.00";
+      totalRow.getCell(10).font = { name: "Pretendard", size: 10, bold: true };
+      totalRow.getCell(11).value = 1.0;
+      totalRow.getCell(11).numFmt = "0.0%";
+      totalRow.getCell(11).font = { name: "Pretendard", size: 10, bold: true };
+
+      for (let col = 1; col <= 15; col++) {
+        const cell = totalRow.getCell(col);
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_BG_LIGHT } };
+        cell.border = {
+          top: { style: "medium", color: { argb: COLOR_PRIMARY } },
+          bottom: { style: "double", color: { argb: COLOR_PRIMARY } }
+        };
+      }
+
+      // ==========================================
+      // SHEET 3: 날짜별히스토리
+      // ==========================================
+      const wsHistory = workbook.addWorksheet("날짜별히스토리", {
+        views: [{ showGridLines: true }]
+      });
+
+      wsHistory.columns = [
+        { header: "일자", key: "date", width: 14 },
+        { header: "기준환율", key: "fx", width: 16 },
+        { header: "총자산 (KRW)", key: "total", width: 22 },
+        { header: "안전자산 (KRW)", key: "safe", width: 20 },
+        { header: "위험자산 (KRW)", key: "risk", width: 20 },
+        { header: "종목수", key: "count", width: 10 }
       ];
-      appState.snapshots.forEach(s => {
+
+      const histHeader = wsHistory.getRow(1);
+      histHeader.height = 25;
+      histHeader.font = { name: "Pretendard", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
+      for (let col = 1; col <= 6; col++) {
+        const cell = histHeader.getCell(col);
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: COLOR_HEADER_BG } };
+        cell.alignment = { vertical: "middle", horizontal: col > 1 ? "right" : "center" };
+      }
+
+      appState.snapshots.forEach((s, idx) => {
         let t = 0, sa = 0, ri = 0;
         s.items.forEach(i => {
           const e = getItemEvalAmounts(i, s.exchangeRate || 1350);
           t += e.krw;
           if (i.isSafe) sa += e.krw; else ri += e.krw;
         });
-        historyData.push([s.date, s.exchangeRate || 1350, t, sa, ri, s.items.length]);
+
+        const r = wsHistory.addRow({
+          date: s.date,
+          fx: s.exchangeRate || 1350,
+          total: t,
+          safe: sa,
+          risk: ri,
+          count: s.items.length
+        });
+        r.height = 21;
+        r.font = { name: "Pretendard", size: 9.5 };
+        r.getCell(1).alignment = { vertical: "middle", horizontal: "center" };
+        r.getCell(2).numFmt = "₩#,##0";
+        r.getCell(3).numFmt = "₩#,##0";
+        r.getCell(4).numFmt = "₩#,##0";
+        r.getCell(5).numFmt = "₩#,##0";
+        r.getCell(6).alignment = { vertical: "middle", horizontal: "right" };
+
+        if (idx % 2 === 1) {
+          for (let col = 1; col <= 6; col++) {
+            r.getCell(col).fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF8FAFC" } };
+          }
+        }
+        for (let col = 1; col <= 6; col++) {
+          r.getCell(col).border = { bottom: { style: "thin", color: { argb: "FFE2E8F0" } } };
+        }
       });
 
-      const wb = XLSX.utils.book_new();
-      const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
-      const wsThings = XLSX.utils.aoa_to_sheet(thingsData);
-      const wsHistory = XLSX.utils.aoa_to_sheet(historyData);
+      // 히스토리 추이 라인 차트 임베딩
+      try {
+        const lineCanvas = document.getElementById("historyLineChart");
+        if (lineCanvas) {
+          const imgBase64 = lineCanvas.toDataURL("image/png");
+          const imageId = workbook.addImage({
+            base64: imgBase64,
+            extension: "png"
+          });
+          wsHistory.addImage(imageId, {
+            tl: { col: 7, row: 1 },
+            ext: { width: 480, height: 260 }
+          });
+        }
+      } catch (e) {
+        console.warn("히스토리 차트 이미지 삽입 실패:", e);
+      }
 
-      XLSX.utils.book_append_sheet(wb, wsSummary, "자산요약");
-      XLSX.utils.book_append_sheet(wb, wsThings, "things");
-      XLSX.utils.book_append_sheet(wb, wsHistory, "날짜별히스토리");
+      // 엑셀 파일 다운로드 트리거
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const filename = `자산관리_대시보드리포트_${cur.date}.xlsx`;
 
-      const filename = `자산관리_리포트_${cur.date}.xlsx`;
-      XLSX.writeFile(wb, filename);
-      showToast(`엑셀 리포트 '${filename}'가 다운로드되었습니다.`);
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+
+      showToast(`✨ 고급 엑셀 리포트 '${filename}'가 다운로드되었습니다.`);
     }
 
     // 8번째 요청: 자산입력 샘플 템플릿 금액 모두 십만원(100,000)으로 통일!
